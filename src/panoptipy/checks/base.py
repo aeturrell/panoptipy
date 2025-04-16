@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
+import toml
+from validate_pyproject import api, errors
+
 # Use TYPE_CHECKING to avoid circular imports
 if TYPE_CHECKING:
     from ..core import Codebase  # Only imported for type checking
@@ -1123,5 +1126,85 @@ class PydoclintCheck(Check):
                 check_id=self.check_id,
                 status=CheckStatus.ERROR,
                 message=f"Error executing pydoclint check: {str(e)}",
+                details={"error": str(e)},
+            )
+
+
+class PyprojectTomlValidateCheck(Check):
+    """
+    Checks for the presence and validates pyproject.toml using the
+    'validate-pyproject' API directly.
+
+    - SKIPS if pyproject.toml is not found at the codebase root.
+    - FAILS if 'validate-pyproject' reports errors for the file.
+    - PASSES if 'validate-pyproject' validates the file successfully.
+    - ERRORS if the pyproject.toml cannot be parsed.
+    """
+
+    def __init__(self):
+        super().__init__(
+            check_id="pyproject_toml_validate",
+            description="Checks pyproject.toml format and schema using validate-pyproject API",
+        )
+
+    @property
+    def category(self) -> str:
+        """Category this check belongs to."""
+        return "configuration"
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        """Run the pyproject.toml validation check against the codebase using the API."""
+
+        pyproject_path = os.path.join(codebase.root_path, "pyproject.toml")
+
+        if not os.path.exists(pyproject_path):
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.SKIP,
+                message="pyproject.toml not found in the codebase root.",
+            )
+
+        try:
+            with open(pyproject_path, "r", encoding="utf-8") as f:
+                pyproject_toml_str = f.read()
+            pyproject_as_dict = toml.loads(pyproject_toml_str)
+
+            validator = api.Validator()
+            validator(pyproject_as_dict)
+
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.PASS,
+                message="pyproject.toml validated successfully by validate-pyproject API.",
+            )
+
+        except FileNotFoundError:
+            # This should ideally be caught by the initial os.path.exists check,
+            # but keeping it for robustness.
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.SKIP,
+                message="pyproject.toml not found in the codebase root.",
+            )
+        except toml.TomlDecodeError as e:
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error parsing pyproject.toml: {e}",
+                details={"error": str(e)},
+            )
+        except errors.ValidationError as ex:
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.FAIL,
+                message=f"pyproject.toml validation failed: {ex.message}",
+                details={"error": str(ex), "context": ex.context},
+            )
+        except Exception as e:
+            # Catch any other unexpected errors
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"An unexpected error occurred while validating pyproject.toml: {e}",
                 details={"error": str(e)},
             )

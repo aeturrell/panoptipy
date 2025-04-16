@@ -7,6 +7,7 @@ from .checks.base import (
     NotebookOutputCheck,
     PrivateKeyCheck,
     PydoclintCheck,
+    PyprojectTomlValidateCheck,
     RuffFormatCheck,
     RuffLintingCheck,
 )
@@ -52,4 +53,5 @@ class CheckRegistry:
         self.register(PrivateKeyCheck())
         self.register(NotebookOutputCheck())
         self.register(PydoclintCheck())
+        self.register(PyprojectTomlValidateCheck())
         # Register more built-in checks here as they're added

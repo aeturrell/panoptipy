@@ -14,7 +14,8 @@ repos:
       # Run the formatter.
       - id: ruff-format
         types_or: [python, pyi, jupyter]
-  - repo: local
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0  # Use the ref you want to point at
     hooks:
       - id: check-added-large-files
         name: Check for added large files

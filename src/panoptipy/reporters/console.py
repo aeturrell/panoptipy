@@ -31,7 +31,7 @@ class ConsoleReporter:
         "gold": "yellow",
         "silver": "bright_white",
         "bronze": "orange3",
-        "unrateable": "red",
+        "problematic": "red",
     }
 
     def __init__(self, use_emoji: bool = True, show_details: bool = False):
@@ -96,7 +96,7 @@ class ConsoleReporter:
         self.console.print(
             Panel(
                 Text(f"Codebase Rating: {rating_value.upper()}", style=f"bold {color}"),
-                title="PanoptiPy Report",
+                title="Panoptipy Report",
                 border_style=color,
             )
         )

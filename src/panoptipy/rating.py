@@ -14,7 +14,7 @@ class CodebaseRating(Enum):
     GOLD = "gold"
     SILVER = "silver"
     BRONZE = "bronze"
-    UNRATEABLE = "unrateable"
+    problematic = "problematic"
 
 
 class RatingCalculator:
@@ -38,9 +38,9 @@ class RatingCalculator:
         Returns:
             Overall rating for the codebase
         """
-        # Check for critical failures that would make the codebase unrateable
+        # Check for critical failures that would make the codebase problematic
         if self._has_critical_failures(results):
-            return CodebaseRating.UNRATEABLE
+            return CodebaseRating.problematic
 
         # Calculate pass ratio
         pass_ratio = self._calculate_pass_ratio(results)
@@ -58,7 +58,7 @@ class RatingCalculator:
         elif pass_ratio >= bronze_threshold:
             return CodebaseRating.BRONZE
         else:
-            return CodebaseRating.UNRATEABLE
+            return CodebaseRating.problematic
 
     def _has_critical_failures(self, results: List[CheckResult]) -> bool:
         """Check if there are any failures in critical checks.

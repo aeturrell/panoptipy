@@ -1,5 +1,6 @@
 """Base classes for implementing checks in panoptipy."""
 
+import json
 import os
 import subprocess
 import tempfile
@@ -245,3 +246,382 @@ class RuffLintingCheck(Check):
             # Clean up temp file
             if os.path.exists(output_path):
                 os.unlink(output_path)
+
+
+class RuffFormatCheck(Check):
+    """Check that verifies code formatting using ruff format."""
+
+    def __init__(self):
+        super().__init__(
+            check_id="ruff_format",
+            description="Checks that code follows proper formatting using ruff format",
+        )
+
+    @property
+    def category(self) -> str:
+        """Category this check belongs to."""
+        return "formatting"
+
+    def _parse_format_output(self, output: str) -> List[Dict[str, Any]]:
+        """Parse ruff format output into structured format.
+
+        Args:
+            output: Console output from ruff format command
+
+        Returns:
+            List of dictionaries containing parsed formatting issues
+        """
+        issues = []
+        lines = output.strip().split("\n")
+
+        # Format output is usually file paths of files that would be reformatted
+        for line in lines:
+            line = line.strip()
+            if (
+                not line
+                or line.startswith("would reformat")
+                or line.startswith("Oh no!")
+            ):
+                continue
+
+            # Each line should be a file path of a file that needs formatting
+            if os.path.exists(line):
+                issues.append(
+                    {
+                        "file": line,
+                        "issue": "Formatting does not match ruff format style",
+                    }
+                )
+
+        return issues
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        """Run ruff format check against the codebase.
+
+        Args:
+            codebase: The codebase to check
+
+        Returns:
+            CheckResult: Result of the check
+        """
+        try:
+            # Get the root directory of the codebase
+            root_dir = codebase.root_path
+
+            # Run ruff format with check flag (doesn't modify files)
+            result = subprocess.run(
+                ["ruff", "format", "--check", str(root_dir)],
+                capture_output=True,
+                text=True,
+                check=False,  # Don't raise exception on formatting errors
+            )
+
+            # Parse output - if exit code is non-zero, formatting issues were found
+            if result.returncode != 0:
+                formatting_issues = self._parse_format_output(result.stdout)
+                issue_count = len(formatting_issues)
+
+                return CheckResult(
+                    check_id=self.check_id,
+                    status=CheckStatus.FAIL,
+                    message=f"Found {issue_count} files with formatting issues",
+                    details={"issues": formatting_issues, "issue_count": issue_count},
+                )
+
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.PASS,
+                message="All files are properly formatted",
+            )
+
+        except Exception as e:
+            # Handle any exceptions during the check execution
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error executing ruff format check: {str(e)}",
+                details={"error": str(e)},
+            )
+
+
+class LargeFilesCheck(Check):
+    """Check that detects large files using pre-commit's check-added-large-files hook."""
+
+    def __init__(self, max_size_kb: Optional[int] = None):
+        """Initialize the large files check.
+
+        Args:
+            max_size_kb: Maximum allowed file size in KB. If None, uses pre-commit's default (500KB)
+        """
+        super().__init__(
+            check_id="large_files",
+            description="Checks for large files that exceed size threshold",
+        )
+        self.max_size_kb = max_size_kb
+
+    @property
+    def category(self) -> str:
+        """Category this check belongs to."""
+        return "file_size"
+
+    def _parse_large_files_output(self, output: str) -> List[Dict[str, Any]]:
+        """Parse pre-commit output to identify large files.
+
+        Args:
+            output: Console output from pre-commit command
+
+        Returns:
+            List of dictionaries containing information about large files
+        """
+        large_files = []
+        lines = output.strip().split("\n")
+
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("check-added-large-files"):
+                continue
+
+            # Example output: "foo.py: 501.0 KB (limit: 500.0 KB)"
+            if ":" in line:
+                try:
+                    file_part, size_part = line.split(":", 1)
+                    file_path = file_part.strip()
+
+                    # Extract size information
+                    size_info = size_part.strip()
+                    size_kb = float(size_info.split(" KB")[0].strip())
+
+                    # Extract limit if present
+                    limit_kb = None
+                    if "(limit:" in size_info:
+                        limit_part = size_info.split("(limit:")[1].strip()
+                        limit_kb = float(limit_part.split(" KB")[0].strip())
+
+                    large_files.append(
+                        {"file": file_path, "size_kb": size_kb, "limit_kb": limit_kb}
+                    )
+                except (ValueError, IndexError):
+                    # Skip lines that don't match expected format
+                    continue
+
+        return large_files
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        """Run large files check against the codebase.
+
+        Args:
+            codebase: The codebase to check
+
+        Returns:
+            CheckResult: Result of the check
+        """
+        try:
+            # Get the root directory of the codebase
+            root_dir = codebase.root_path
+
+            # Prepare command to run only the check-added-large-files hook
+            cmd = ["pre-commit", "run", "check-added-large-files", "--all-files"]
+
+            # Add custom max size if specified
+            if self.max_size_kb is not None:
+                cmd.extend(
+                    [
+                        "--config",
+                        json.dumps(
+                            {
+                                "repos": [
+                                    {
+                                        "repo": "local",
+                                        "hooks": [
+                                            {
+                                                "id": "check-added-large-files",
+                                                "args": [f"--maxkb={self.max_size_kb}"],
+                                            }
+                                        ],
+                                    }
+                                ]
+                            }
+                        ),
+                    ]
+                )
+
+            # Run pre-commit with specific hook
+            result = subprocess.run(
+                cmd,
+                cwd=str(root_dir),
+                capture_output=True,
+                text=True,
+                check=False,  # Don't raise exception on found issues
+            )
+
+            # Parse output - non-zero exit code means large files found
+            if result.returncode != 0:
+                large_files = self._parse_large_files_output(
+                    result.stdout or result.stderr
+                )
+                file_count = len(large_files)
+
+                max_size_display = (
+                    f"{self.max_size_kb}KB" if self.max_size_kb else "default limit"
+                )
+
+                return CheckResult(
+                    check_id=self.check_id,
+                    status=CheckStatus.FAIL,
+                    message=f"Found {file_count} files exceeding size threshold ({max_size_display})",
+                    details={
+                        "large_files": large_files,
+                        "count": file_count,
+                        "max_size_kb": self.max_size_kb
+                        or (large_files[0].get("limit_kb") if large_files else 500),
+                    },
+                )
+
+            max_size_display = (
+                f"{self.max_size_kb}KB" if self.max_size_kb else "default limit"
+            )
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.PASS,
+                message=f"No files exceed size threshold ({max_size_display})",
+            )
+
+        except Exception as e:
+            # Handle any exceptions during the check execution
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error executing large files check: {str(e)}",
+                details={"error": str(e)},
+            )
+
+class PrivateKeyCheck(Check):
+    """Check that detects private keys in files without relying on external tools."""
+
+    # Common private key patterns to detect
+    BLACKLIST = [
+        b'BEGIN RSA PRIVATE KEY',
+        b'BEGIN DSA PRIVATE KEY',
+        b'BEGIN EC PRIVATE KEY',
+        b'BEGIN OPENSSH PRIVATE KEY',
+        b'BEGIN PRIVATE KEY',
+        b'PuTTY-User-Key-File-2',
+        b'BEGIN SSH2 ENCRYPTED PRIVATE KEY',
+        b'BEGIN PGP PRIVATE KEY BLOCK',
+        b'BEGIN ENCRYPTED PRIVATE KEY',
+        b'BEGIN OpenVPN Static key V1',
+    ]
+
+    def __init__(self, additional_patterns: Optional[List[bytes]] = None):
+        """Initialize the standalone private key detection check.
+        
+        Args:
+            additional_patterns: Optional list of additional byte patterns to detect
+        """
+        super().__init__(
+            check_id="detect_private_key",
+            description="Checks for files containing private keys or credentials using direct file scanning"
+        )
+        
+        # Add any additional patterns to the blacklist
+        self.blacklist = self.BLACKLIST.copy()
+        if additional_patterns:
+            self.blacklist.extend(additional_patterns)
+
+    @property
+    def category(self) -> str:
+        """Category this check belongs to."""
+        return "security"
+
+    def _check_file(self, filepath: str) -> Optional[str]:
+        """Check if a file contains private key patterns.
+        
+        Args:
+            filepath: Path to the file to check
+            
+        Returns:
+            Optional[str]: If private key detected, returns the specific pattern found, else None
+        """
+        try:
+            # Skip binary files or files that are too large (>1MB)
+            if not os.path.isfile(filepath) or os.path.getsize(filepath) > 1024 * 1024:
+                return None
+                
+            with open(filepath, 'rb') as f:
+                content = f.read()
+                
+                for pattern in self.blacklist:
+                    if pattern in content:
+                        return pattern.decode('utf-8', errors='replace')
+                        
+            return None
+        except (IOError, PermissionError):
+            # Skip files we can't read
+            return None
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        """Run private key detection check against the codebase.
+        
+        Args:
+            codebase: The codebase to check
+            
+        Returns:
+            CheckResult: Result of the check
+        """
+        try:
+            # Get all files in the codebase
+            root_dir = codebase.root_path
+            private_key_files = []
+            
+            # List of file extensions to skip
+            skip_extensions = ['.jpg', '.png', '.gif', '.pdf', '.zip', '.tar', 
+                              '.gz', '.mp3', '.mp4', '.avi', '.mov', '.exe']
+            
+            # Walk through all files in the codebase
+            for dirpath, _, filenames in os.walk(root_dir):
+                for filename in filenames:
+                    # Skip files with binary extensions
+                    if any(filename.lower().endswith(ext) for ext in skip_extensions):
+                        continue
+                        
+                    filepath = os.path.join(dirpath, filename)
+                    relative_path = os.path.relpath(filepath, root_dir)
+                    
+                    # Check if file contains private key
+                    pattern_found = self._check_file(filepath)
+                    
+                    if pattern_found:
+                        private_key_files.append({
+                            "file": relative_path,
+                            "pattern": pattern_found,
+                            "message": f"Contains private key pattern: {pattern_found}"
+                        })
+            
+            # Check results
+            if private_key_files:
+                file_count = len(private_key_files)
+                
+                return CheckResult(
+                    check_id=self.check_id,
+                    status=CheckStatus.FAIL,
+                    message=f"Found {file_count} files containing private keys",
+                    details={
+                        "files_with_private_keys": private_key_files,
+                        "count": file_count
+                    }
+                )
+            
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.PASS,
+                message="No private keys detected in codebase",
+            )
+            
+        except Exception as e:
+            # Handle any exceptions during the check execution
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error executing private key detection check: {str(e)}",
+                details={"error": str(e)}
+            )

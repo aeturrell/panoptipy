@@ -1324,6 +1324,7 @@ dependencies = [
     { name = "loguru" },
     { name = "pluggy" },
     { name = "rich" },
+    { name = "ruff" },
     { name = "toml" },
 ]
 
@@ -1341,7 +1342,6 @@ dev = [
     { name = "pygments" },
     { name = "pytest" },
     { name = "quartodoc" },
-    { name = "ruff" },
     { name = "toml" },
     { name = "typing-extensions" },
     { name = "xdoctest", extra = ["colors"] },
@@ -1353,6 +1353,7 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pluggy", specifier = ">=1.5.0" },
     { name = "rich", specifier = ">=14.0.0" },
+    { name = "ruff", specifier = ">=0.11.5" },
     { name = "toml", specifier = ">=0.10.2" },
 ]
 
@@ -1370,7 +1371,6 @@ dev = [
     { name = "pygments", specifier = ">=2.18.0" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "quartodoc", specifier = ">=0.9.1" },
-    { name = "ruff", specifier = ">=0.8.3" },
     { name = "toml", specifier = ">=0.10.2" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "xdoctest", extras = ["colors"], specifier = ">=1.2.0" },

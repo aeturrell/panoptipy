@@ -1,6 +1,6 @@
 import pluggy
 
-from .checks.base import Check, DocstringCheck
+from .checks.base import Check, DocstringCheck, RuffLintingCheck
 
 # Define a hook specification namespace
 hookspec = pluggy.HookspecMarker("panoptipy")
@@ -37,4 +37,5 @@ class CheckRegistry:
         """Load the built-in checks."""
         # Register built-in checks
         self.register(DocstringCheck())
+        self.register(RuffLintingCheck())
         # Register more built-in checks here as they're added

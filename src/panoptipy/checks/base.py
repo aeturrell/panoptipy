@@ -1,8 +1,11 @@
 """Base classes for implementing checks in panoptipy."""
 
+import os
+import subprocess
+import tempfile
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 # Use TYPE_CHECKING to avoid circular imports
 if TYPE_CHECKING:
@@ -112,7 +115,6 @@ class DocstringCheck(Check):
                     missing_docstrings.append(f"{module_path}:{item_name}")
 
         if missing_docstrings:
-            print(missing_docstrings)
             return CheckResult(
                 check_id=self.check_id,
                 status=CheckStatus.FAIL,
@@ -125,3 +127,121 @@ class DocstringCheck(Check):
             status=CheckStatus.PASS,
             message="All public items have docstrings",
         )
+
+
+class RuffLintingCheck(Check):
+    """Check that runs ruff linter to identify code issues."""
+
+    def __init__(self):
+        super().__init__(
+            check_id="ruff_linting",
+            description="Checks code for linting errors using ruff",
+        )
+
+    @property
+    def category(self) -> str:
+        """Category this check belongs to."""
+        return "linting"
+
+    def _parse_ruff_output(self, output: str) -> List[Dict[str, Any]]:
+        """Parse ruff output into structured format.
+
+        Args:
+            output: Console output from ruff command
+
+        Returns:
+            List of dictionaries containing parsed linting errors
+        """
+        issues = []
+        lines = output.strip().split("\n")
+
+        for line in lines:
+            if not line or line.startswith("Found") or line.startswith("ruff"):
+                continue
+
+            try:
+                # Expected format: file_path:line:col: error_code error_message
+                parts = line.split(":", 3)
+                if len(parts) < 4:
+                    continue
+
+                file_path = parts[0]
+                line_num = int(parts[1])
+                col = int(parts[2])
+
+                # Further split error code and message
+                error_part = parts[3].strip()
+                error_code, error_message = error_part.split(" ", 1)
+
+                issues.append(
+                    {
+                        "file": file_path,
+                        "line": line_num,
+                        "column": col,
+                        "code": error_code,
+                        "message": error_message.strip(),
+                    }
+                )
+            except (ValueError, IndexError):
+                # Skip lines that don't match expected format
+                continue
+
+        return issues
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        """Run ruff linting check against the codebase.
+
+        Args:
+            codebase: The codebase to check
+
+        Returns:
+            CheckResult: Result of the check
+        """
+        # Create a temporary directory to write output
+        with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as temp_file:
+            output_path = temp_file.name
+
+        try:
+            # Get the root directory of the codebase
+            root_dir = codebase.root_path
+
+            # Run ruff on the entire codebase
+            result = subprocess.run(
+                ["ruff", "check", str(root_dir)],
+                capture_output=True,
+                text=True,
+                check=False,  # Don't raise exception on linting errors
+            )
+
+            # Parse output
+            linting_issues = self._parse_ruff_output(result.stdout)
+
+            # Get total count of issues
+            issue_count = len(linting_issues)
+
+            if issue_count > 0:
+                return CheckResult(
+                    check_id=self.check_id,
+                    status=CheckStatus.FAIL,
+                    message=f"Found {issue_count} linting issues in codebase",
+                    details={"issues": linting_issues, "issue_count": issue_count},
+                )
+
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.PASS,
+                message="No linting issues found",
+            )
+
+        except Exception as e:
+            # Handle any exceptions during the check execution
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error executing ruff linting check: {str(e)}",
+                details={"error": str(e)},
+            )
+        finally:
+            # Clean up temp file
+            if os.path.exists(output_path):
+                os.unlink(output_path)

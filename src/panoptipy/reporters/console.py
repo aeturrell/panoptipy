@@ -19,11 +19,11 @@ class ConsoleReporter:
 
     # Status symbols and colors for different check statuses
     STATUS_STYLES: Dict[str, Dict[str, Any]] = {
-        "pass": {"symbol": "✓", "color": "green", "emoji": ":check_mark_button:"},
+        "pass": {"symbol": "✓", "color": "green", "emoji": "white_heavy_check_mark"},
         "fail": {"symbol": "✗", "color": "red", "emoji": "x"},
-        "warning": {"symbol": "!", "color": "yellow", "emoji": ":warning:"},
-        "skip": {"symbol": "-", "color": "blue", "emoji": ":information:"},
-        "error": {"symbol": "?", "color": "magenta", "emoji": ":question_mark:"},
+        "warning": {"symbol": "!", "color": "yellow", "emoji": "warning"},
+        "skip": {"symbol": "-", "color": "blue", "emoji": "information"},
+        "error": {"symbol": "?", "color": "magenta", "emoji": "question_mark"},
     }
 
     # Colors for codebase ratings

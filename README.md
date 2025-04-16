@@ -1,0 +1,3 @@
+# panoptipy
+
+An example project.

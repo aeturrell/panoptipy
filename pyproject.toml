@@ -1,7 +1,7 @@
 [project]
 name = "panoptipy"
 version = "0.0.1"
-description = "An example project."
+description = "A Python Package for Static Code Quality Assessment"
 authors = [{name="Anonymous", email="anon@anon.gmail.com"}]
 readme = "README.md"
 license = {file = "LICENSE"}

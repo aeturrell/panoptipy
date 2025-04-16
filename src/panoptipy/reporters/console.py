@@ -255,7 +255,7 @@ class ConsoleReporter:
 
 
 def create_reporter(
-    show_details: bool = False, use_emoji: bool = True
+    show_details: bool = True, use_emoji: bool = True
 ) -> ConsoleReporter:
     """Create a console reporter with the specified options.
 

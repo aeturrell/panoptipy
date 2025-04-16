@@ -4,7 +4,9 @@ from .checks.base import (
     Check,
     DocstringCheck,
     LargeFilesCheck,
+    NotebookOutputCheck,
     PrivateKeyCheck,
+    PydoclintCheck,
     RuffFormatCheck,
     RuffLintingCheck,
 )
@@ -48,4 +50,6 @@ class CheckRegistry:
         self.register(RuffFormatCheck())
         self.register(LargeFilesCheck())
         self.register(PrivateKeyCheck())
+        self.register(NotebookOutputCheck())
+        self.register(PydoclintCheck())
         # Register more built-in checks here as they're added

@@ -6,10 +6,10 @@ a code repository and the Scanner class that runs checks against the codebase.
 
 import ast
 import logging
-import os
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from .checks.base import CheckResult, CheckStatus
 from .config import Config
@@ -93,80 +93,120 @@ class PythonModule:
 
 
 class Codebase:
-    """Represents a full codebase for analysis."""
+    """Represents a codebase for analysis, including only files tracked by Git."""
 
     def __init__(self, root_path: Path):
         """Initialize a codebase from a root directory.
 
+        Only files tracked by Git within this path will be included.
+
         Args:
-            root_path: Path to the root of the codebase
+            root_path: Path to the root of the codebase (must be within a Git repository).
+
+        Raises:
+            FileNotFoundError: If the root_path does not exist.
+            RuntimeError: If the root_path is not part of a Git repository or Git is not found.
         """
+        if not root_path.is_dir():
+            raise FileNotFoundError(
+                f"Root path does not exist or is not a directory: {root_path}"
+            )
+
         self.root_path = root_path.absolute()
         self._files: Dict[Path, FileInfo] = {}
         self._python_modules: Dict[Path, PythonModule] = {}
-        self._ignored_patterns: Set[str] = set()
 
-        # Common patterns to ignore
-        self.add_ignore_pattern("__pycache__")
-        self.add_ignore_pattern(".git")
-        self.add_ignore_pattern(".venv")
-        self.add_ignore_pattern("venv")
-        self.add_ignore_pattern(".pytest_cache")
-        self.add_ignore_pattern(".mypy_cache")
-        self.add_ignore_pattern(".nox")
-        self.add_ignore_pattern(".tox")
-        self.add_ignore_pattern("build")
-        self.add_ignore_pattern("dist")
-        self.add_ignore_pattern(".eggs")
-        self.add_ignore_pattern("*.egg-info")
-        self.add_ignore_pattern(".coverage")
-        self.add_ignore_pattern("htmlcov")
-        self.add_ignore_pattern(".idea")
-        self.add_ignore_pattern(".vs")
-        self.add_ignore_pattern(".vscode")
-        self.add_ignore_pattern("node_modules")
+        # Check if it's a Git repository
+        if not self._is_git_repository():
+            raise RuntimeError(
+                f"Path is not part of a Git repository: {self.root_path}"
+            )
 
-    def add_ignore_pattern(self, pattern: str) -> None:
-        """Add a pattern to ignore when scanning files.
-
-        Args:
-            pattern: Directory or file pattern to ignore
-        """
-        self._ignored_patterns.add(pattern)
+    def _is_git_repository(self) -> bool:
+        """Check if the root_path is inside a Git repository."""
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"],
+                cwd=self.root_path,
+                capture_output=True,
+                text=True,
+                check=True,
+                encoding="utf-8",
+            )
+            return result.stdout.strip() == "true"
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            # Git not found or not a git repo
+            return False
 
     def scan_files(self) -> None:
-        """Scan the codebase to find and load all files."""
+        """Scan the codebase using 'git ls-files' to find and load tracked files."""
         self._files = {}
+        self._python_modules = {}
 
-        for root, dirs, files in os.walk(self.root_path):
-            # Filter out ignored directories
-            dirs[:] = [d for d in dirs if d not in self._ignored_patterns]
+        try:
+            # Use 'git ls-files -z' to list all tracked files, null-terminated
+            # -z handles filenames with spaces or special characters safely.
+            # --cached lists files in the index (staged)
+            # --others lists untracked files (we don't want these)
+            # --exclude-standard respects .gitignore, .git/info/exclude etc.
+            # Running 'git ls-files -z' gets all files tracked by git
+            result = subprocess.run(
+                ["git", "ls-files", "-z"],
+                cwd=self.root_path,
+                capture_output=True,
+                check=True,  # Raise CalledProcessError if git command fails
+                encoding="utf-8",  # Git typically uses UTF-8 for file paths
+                errors="surrogateescape",  # Handle potential non-UTF8 paths gracefully
+            )
 
-            for file in files:
-                path = Path(root) / file
-                rel_path = path.relative_to(self.root_path)
+            # Split the null-terminated string into relative paths
+            relative_paths = result.stdout.strip("\0").split("\0")
 
-                # Skip ignored files
-                if any(pattern in str(rel_path) for pattern in self._ignored_patterns):
+            for rel_path_str in relative_paths:
+                if not rel_path_str:  # Skip empty strings if any
+                    continue
+
+                # Decode potential surrogate escapes back if needed, although usually paths are fine
+                # rel_path_str = os.fsdecode(rel_path_str.encode('utf-8', 'surrogateescape')) # May not be needed
+
+                rel_path = Path(rel_path_str)
+                path = self.root_path / rel_path
+
+                # Although git ls-files lists tracked files, double-check existence
+                # in case of weird states (e.g., deleted but still tracked before commit)
+                if not path.is_file():
+                    logger.warning(f"File listed by git ls-files not found: {path}")
                     continue
 
                 try:
                     is_binary = False
                     size_bytes = path.stat().st_size
 
-                    # Try to read as text, fall back to binary
+                    # Try to read as text, fall back if it fails (likely binary)
                     try:
+                        # Use git's preferred encoding detection logic if possible,
+                        # otherwise fallback to utf-8 attempt. For simplicity,
+                        # we stick to the original utf-8 attempt here.
                         content = path.read_text(encoding="utf-8")
                     except UnicodeDecodeError:
-                        content = ""
+                        logger.debug(
+                            f"Could not decode {path} as UTF-8, treating as binary."
+                        )
+                        content = (
+                            ""  # Or read as bytes if needed by FileInfo/PythonModule
+                        )
                         is_binary = True
+                    except OSError as e:  # Handle potential read errors
+                        logger.warning(f"Could not read file {path}: {e}")
+                        continue  # Skip this file
 
                     file_info = FileInfo(
-                        path=path,
+                        path=path,  # Store absolute path maybe? Or keep consistent with key? Let's use absolute path here.
                         content=content,
                         is_binary=is_binary,
                         size_bytes=size_bytes,
                     )
+                    # Use relative path as the key for consistency
                     self._files[rel_path] = file_info
 
                     # Create Python module if it's a Python file
@@ -174,75 +214,98 @@ class Codebase:
                         self._python_modules[rel_path] = PythonModule(file_info)
 
                 except Exception as e:
-                    logger.warning(f"Failed to read {path}: {e}")
+                    # Catch broader exceptions during file processing
+                    logger.warning(f"Failed to process file {path}: {e}")
+
+        except FileNotFoundError:
+            logger.error(
+                "Git command not found. Please ensure Git is installed and in PATH."
+            )
+            raise RuntimeError("Git command not found.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Git command failed: {e.stderr}")
+            # Raise specific error or handle depending on desired behaviour
+            raise RuntimeError(f"Git command failed: {e.stderr}")
+        except Exception as e:
+            logger.exception(f"An unexpected error occurred during file scanning: {e}")
+            raise  # Re-raise unexpected exceptions
 
     def get_all_files(self) -> List[FileInfo]:
-        """Get information about all files in the codebase.
+        """Get information about all files tracked by Git in the codebase.
 
         Returns:
-            List of FileInfo objects for all files
+            List of FileInfo objects for all tracked files.
         """
         if not self._files:
             self.scan_files()
         return list(self._files.values())
 
     def get_python_modules(self) -> List[PythonModule]:
-        """Get all Python modules in the codebase.
+        """Get all Python modules tracked by Git in the codebase.
 
         Returns:
-            List of PythonModule objects
+            List of PythonModule objects.
         """
         if not self._python_modules:
+            # Ensure files are scanned first if modules are requested directly
             self.scan_files()
         return list(self._python_modules.values())
 
+    # --- Methods below generally don't need changes, but rely on _files populated by scan_files ---
+
     def has_file(self, filename: str) -> bool:
-        """Check if a file exists in the codebase.
+        """Check if a file with the given name exists in the tracked files.
 
         Args:
-            filename: Name of the file to check for
+            filename: Base name of the file to check for (e.g., 'setup.py').
 
         Returns:
-            True if the file exists, False otherwise
+            True if a tracked file with that name exists, False otherwise.
         """
         if not self._files:
             self.scan_files()
-
-        return any(f.path.name == filename for f in self._files.values())
+        # Use the keys (relative paths) for checking
+        return any(rel_path.name == filename for rel_path in self._files.keys())
 
     def get_file_by_name(self, filename: str) -> Optional[FileInfo]:
-        """Get a file by name.
+        """Get a tracked file by its base name.
+
+        Note: If multiple files with the same name exist in different
+              directories, this returns the first one encountered.
 
         Args:
-            filename: Name of the file to get
+            filename: Base name of the file to get (e.g., 'requirements.txt').
 
         Returns:
-            FileInfo for the file, or None if not found
+            FileInfo for the first tracked file found with that name, or None if not found.
         """
         if not self._files:
             self.scan_files()
 
-        for file in self._files.values():
-            if file.path.name == filename:
-                return file
-
+        for rel_path, file_info in self._files.items():
+            if rel_path.name == filename:
+                return file_info
         return None
 
     def find_files_by_extension(self, extension: str) -> List[FileInfo]:
-        """Find all files with a specific extension.
+        """Find all tracked files with a specific extension.
 
         Args:
-            extension: File extension to search for (e.g., '.py')
+            extension: File extension to search for (e.g., '.py', 'py').
 
         Returns:
-            List of FileInfo objects matching the extension
+            List of FileInfo objects for tracked files matching the extension.
         """
         if not extension.startswith("."):
             extension = f".{extension}"
 
+        # Ensure files are loaded
+        all_files = self.get_all_files()
+
         return [
             f
-            for f in self.get_all_files()
+            for f in all_files
+            # Check suffix on the relative path used as key, or the absolute path in FileInfo
             if f.path.suffix.lower() == extension.lower()
         ]
 

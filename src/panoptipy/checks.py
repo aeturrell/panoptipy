@@ -12,7 +12,7 @@ from validate_pyproject import api, errors
 
 # Use TYPE_CHECKING to avoid circular imports
 if TYPE_CHECKING:
-    from ..core import Codebase  # Only imported for type checking
+    from .core import Codebase  # Only imported for type checking
 
 
 class CheckStatus(Enum):
@@ -116,6 +116,19 @@ def fail_result(
 
 
 class DocstringCheck(Check):
+    """Check to ensure proper documentation through docstrings in Python codebase.
+
+    This class implements a check that verifies the presence of docstrings for all public 
+    functions and classes in a Python codebase, excluding test files and test-related items.
+    The check considers an item "public" if it doesn't start with an underscore, and identifies
+    test-related items through various common naming patterns.
+
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "docstrings"
+        description (str): Human-readable description of what this check does
+
+    """
     def __init__(self):
         super().__init__(
             check_id="docstrings",
@@ -172,6 +185,15 @@ class DocstringCheck(Check):
 
 
 class RuffLintingCheck(Check):
+    """A Check implementation that performs linting using the Ruff linter.
+
+    This class runs the Ruff linter on a codebase to identify code style and quality issues.
+
+    Attributes:
+        check_id (str): Unique identifier "ruff_linting" for this check
+        description (str): Human readable description of what this check does
+
+    """
     def __init__(self):
         super().__init__(
             check_id="ruff_linting",
@@ -225,6 +247,17 @@ class RuffLintingCheck(Check):
 
 
 class RuffFormatCheck(Check):
+    """A check class that verifies code formatting using ruff format.
+
+    This class implements a check to ensure that code follows proper formatting
+    according to ruff format standards. It runs the 'ruff format --check' command
+    on the codebase and reports any formatting inconsistencies.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "ruff_format"
+        description (str): Description of what this check does
+
+    """
     def __init__(self):
         super().__init__(
             check_id="ruff_format",
@@ -267,6 +300,21 @@ class RuffFormatCheck(Check):
 
 
 class PrivateKeyCheck(Check):
+    """A security check that scans files for private key patterns.
+
+    This class implements a security check to detect private keys in version-controlled files
+    by looking for common private key header patterns. It helps prevent accidental exposure
+    of sensitive credentials in source code repositories.
+
+    Attributes:
+        BLACKLIST (List[bytes]): Default list of byte patterns indicating private keys
+        blacklist (List[bytes]): Instance copy of BLACKLIST that can be extended
+
+    Args:
+        additional_patterns (Optional[List[bytes]], optional): Additional patterns to check.
+            These patterns will be added to the default BLACKLIST. Defaults to None.
+
+    """
     BLACKLIST = [
         b"BEGIN RSA PRIVATE KEY",
         b"BEGIN DSA PRIVATE KEY",
@@ -345,6 +393,19 @@ class PrivateKeyCheck(Check):
 
 
 class LargeFilesCheck(Check):
+    """A check that identifies large files in version control that exceed a specified size threshold.
+
+    This check examines all tracked files in the repository and reports those that are larger
+    than the configured maximum size. This helps identify potentially problematic large files
+    that could bloat the repository or data that have been added to version 
+    control by mistake.
+
+    Attributes:
+        max_size_kb (int): Maximum allowed file size in kilobytes. Defaults to 500KB if not specified.
+        check_id (str): Unique identifier for this check ("large_files")
+        
+
+    """
     def __init__(self, max_size_kb: Optional[int] = None):
         super().__init__(
             check_id="large_files",
@@ -480,6 +541,23 @@ class NotebookOutputCheck(Check):
 
 
 class PydoclintCheck(Check):
+    """A check implementation to validate docstring compatibility with type signatures using pydoclint.
+
+    This class extends the base Check class to verify that docstrings in Python files
+    match their corresponding type signatures. It uses the pydoclint tool to perform
+    the validation.
+
+    The check will:
+    1. Find all Python files in version control
+    2. Filter files to only those containing both docstrings and type annotations
+    3. Run pydoclint on the filtered files
+    4. Report any mismatches between docstrings and type signatures
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "pydoclint"
+        description (str): Description of what this check does
+
+    """
     def __init__(self):
         super().__init__(
             check_id="pydoclint",
@@ -608,6 +686,17 @@ class PydoclintCheck(Check):
 
 
 class PyprojectTomlValidateCheck(Check):
+    """A check class that validates the pyproject.toml file format and schema.
+
+    This check validates both the TOML syntax and the schema of pyproject.toml
+    using the validate-pyproject API. It verifies that the file exists in the 
+    codebase root directory and contains valid configuration.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "pydoclint"
+        description (str): Description of what this check does
+
+    """
     def __init__(self):
         super().__init__(
             check_id="pyproject_toml_validate",

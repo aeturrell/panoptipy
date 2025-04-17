@@ -16,7 +16,6 @@ class Config:
         "reporters": ["console"],
         "thresholds": {
             "max_file_size": 1000,
-            "max_nesting_depth": 5,
         },
     }
 

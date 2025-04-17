@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .checks.base import CheckResult, CheckStatus
+from .checks import CheckResult, CheckStatus
 from .config import Config
 from .rating import CodebaseRating, RatingCalculator
 from .registry import CheckRegistry

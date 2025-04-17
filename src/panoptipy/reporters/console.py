@@ -10,7 +10,7 @@ from rich.table import Table
 from rich.text import Text
 
 if TYPE_CHECKING:
-    from ..checks.base import CheckResult
+    from ..checks import CheckResult
     from ..rating import CodebaseRating
 
 

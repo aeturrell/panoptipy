@@ -1,6 +1,6 @@
 import pluggy
 
-from .checks.base import (
+from .checks import (
     Check,
     DocstringCheck,
     LargeFilesCheck,

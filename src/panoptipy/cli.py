@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from .checks.base import CheckStatus
+from .checks import CheckStatus
 from .config import Config
 from .core import Scanner
 from .registry import CheckRegistry

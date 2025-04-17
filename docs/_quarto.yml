@@ -37,6 +37,5 @@ quartodoc:
       desc: "What panoptipy's functions do"
       contents:
         # the functions being documented in the package.
-        # you can refer to anything: class methods, modules, etc..
-        - foo
-        - class_foo
+        # you can refer to anything: class methods, modules, etc..xw
+        - checks

@@ -4,7 +4,7 @@
 from enum import Enum
 from typing import List
 
-from .checks.base import CheckResult, CheckStatus
+from .checks import CheckResult, CheckStatus
 from .config import Config
 
 
@@ -21,7 +21,7 @@ class RatingCalculator:
     """Calculates ratings for codebases based on check results."""
 
     def __init__(self, config: Config):
-        """Initialize the rating calculator with configuration.
+        """Initialise the rating calculator with configuration.
 
         Args:
             config: Configuration containing rating thresholds

@@ -6,6 +6,7 @@ a code repository and the Scanner class that runs checks against the codebase.
 
 import ast
 import logging
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -428,7 +429,5 @@ def pattern_matches(pattern: str, check_id: str) -> bool:
         return pattern == check_id
 
     # Convert glob pattern to regex
-    import re
-
     regex_pattern = "^" + re.escape(pattern).replace("\\*", ".*") + "$"
     return bool(re.match(regex_pattern, check_id))

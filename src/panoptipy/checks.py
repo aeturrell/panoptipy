@@ -118,7 +118,7 @@ def fail_result(
 class DocstringCheck(Check):
     """Check to ensure proper documentation through docstrings in Python codebase.
 
-    This class implements a check that verifies the presence of docstrings for all public 
+    This class implements a check that verifies the presence of docstrings for all public
     functions and classes in a Python codebase, excluding test files and test-related items.
     The check considers an item "public" if it doesn't start with an underscore, and identifies
     test-related items through various common naming patterns.
@@ -129,6 +129,7 @@ class DocstringCheck(Check):
         description (str): Human-readable description of what this check does
 
     """
+
     def __init__(self):
         super().__init__(
             check_id="docstrings",
@@ -194,6 +195,7 @@ class RuffLintingCheck(Check):
         description (str): Human readable description of what this check does
 
     """
+
     def __init__(self):
         super().__init__(
             check_id="ruff_linting",
@@ -258,6 +260,7 @@ class RuffFormatCheck(Check):
         description (str): Description of what this check does
 
     """
+
     def __init__(self):
         super().__init__(
             check_id="ruff_format",
@@ -315,6 +318,7 @@ class PrivateKeyCheck(Check):
             These patterns will be added to the default BLACKLIST. Defaults to None.
 
     """
+
     BLACKLIST = [
         b"BEGIN RSA PRIVATE KEY",
         b"BEGIN DSA PRIVATE KEY",
@@ -397,15 +401,16 @@ class LargeFilesCheck(Check):
 
     This check examines all tracked files in the repository and reports those that are larger
     than the configured maximum size. This helps identify potentially problematic large files
-    that could bloat the repository or data that have been added to version 
+    that could bloat the repository or data that have been added to version
     control by mistake.
 
     Attributes:
         max_size_kb (int): Maximum allowed file size in kilobytes. Defaults to 500KB if not specified.
         check_id (str): Unique identifier for this check ("large_files")
-        
+
 
     """
+
     def __init__(self, max_size_kb: Optional[int] = None):
         super().__init__(
             check_id="large_files",
@@ -558,6 +563,7 @@ class PydoclintCheck(Check):
         description (str): Description of what this check does
 
     """
+
     def __init__(self):
         super().__init__(
             check_id="pydoclint",
@@ -689,7 +695,7 @@ class PyprojectTomlValidateCheck(Check):
     """A check class that validates the pyproject.toml file format and schema.
 
     This check validates both the TOML syntax and the schema of pyproject.toml
-    using the validate-pyproject API. It verifies that the file exists in the 
+    using the validate-pyproject API. It verifies that the file exists in the
     codebase root directory and contains valid configuration.
 
     Attributes:
@@ -697,6 +703,7 @@ class PyprojectTomlValidateCheck(Check):
         description (str): Description of what this check does
 
     """
+
     def __init__(self):
         super().__init__(
             check_id="pyproject_toml_validate",

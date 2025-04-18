@@ -42,6 +42,8 @@ dev = [
     "typing-extensions>=4.12.2",
     "xdoctest[colors]>=1.2.0",
     "ipykernel>=6.29.5",
+    "pandas>=2.2.3",
+    "great-tables>=0.17.0",
 ]
 
 [project.scripts]

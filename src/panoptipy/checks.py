@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tupl
 import toml
 from validate_pyproject import api, errors
 
+from .config import Config  # Add this import at the top with other imports
+
 # Use TYPE_CHECKING to avoid circular imports
 if TYPE_CHECKING:
     from .core import Codebase  # Only imported for type checking
@@ -407,16 +409,17 @@ class LargeFilesCheck(Check):
     Attributes:
         max_size_kb (int): Maximum allowed file size in kilobytes. Defaults to 500KB if not specified.
         check_id (str): Unique identifier for this check ("large_files")
-
-
     """
 
-    def __init__(self, max_size_kb: Optional[int] = None):
+    def __init__(self, config: Optional[Config] = None):
         super().__init__(
             check_id="large_files",
             description="Checks for large files that exceed size threshold",
         )
-        self.max_size_kb = max_size_kb or 500
+        self.config = config
+        self.max_size_kb = (
+            config.get("thresholds.max_file_size", 500) if config else 500
+        )
 
     @property
     def category(self) -> str:

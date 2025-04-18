@@ -37,7 +37,7 @@ def scan(path, config, format):
     critical_checks = config_obj.get("checks.critical", [])
 
     # Set up registry and load checks
-    registry = CheckRegistry()
+    registry = CheckRegistry(config=config_obj)
     registry.load_builtin_checks()
     registry.load_plugins()
 
@@ -46,7 +46,7 @@ def scan(path, config, format):
     results = scanner.scan(Path(path))
 
     # Generate report
-    reporter = get_reporter(format)
+    reporter = get_reporter(format, config=config_obj)
     reporter.report(results, scanner.rate(results))
 
     # Return appropriate exit code

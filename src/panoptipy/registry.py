@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pluggy
 
 from .checks import (
@@ -11,6 +13,7 @@ from .checks import (
     RuffFormatCheck,
     RuffLintingCheck,
 )
+from .config import Config
 
 # Define a hook specification namespace
 hookspec = pluggy.HookspecMarker("panoptipy")
@@ -29,10 +32,11 @@ class PanoptiPyHooks:
 class CheckRegistry:
     """Registry for code quality checks."""
 
-    def __init__(self):
+    def __init__(self, config: Optional[Config] = None):
         self.checks = {}
         self.plugin_manager = pluggy.PluginManager("panoptipy")
         self.plugin_manager.add_hookspecs(PanoptiPyHooks)
+        self.config = config
 
     def register(self, check: Check):
         """Register a check with the registry."""
@@ -49,7 +53,7 @@ class CheckRegistry:
         self.register(DocstringCheck())
         self.register(RuffLintingCheck())
         self.register(RuffFormatCheck())
-        self.register(LargeFilesCheck())
+        self.register(LargeFilesCheck(config=self.config))  # Pass config here
         self.register(PrivateKeyCheck())
         self.register(NotebookOutputCheck())
         self.register(PydoclintCheck())

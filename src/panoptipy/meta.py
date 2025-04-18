@@ -1,6 +1,7 @@
 import ast
 import importlib.resources
 
+
 def extract_check_info_from_code(code: str) -> list[dict[str, str]]:
     """
     Parses Python code using AST and extracts check_id and description
@@ -21,27 +22,33 @@ def extract_check_info_from_code(code: str) -> list[dict[str, str]]:
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Attribute) and node.func.attr == '__init__':
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "__init__":
                 if isinstance(node.func.value, ast.Call):
-                    if isinstance(node.func.value.func, ast.Name) and node.func.value.func.id == 'super':
+                    if (
+                        isinstance(node.func.value.func, ast.Name)
+                        and node.func.value.func.id == "super"
+                    ):
                         check_id = None
                         description = None
                         for keyword in node.keywords:
-                            if isinstance(keyword.value, ast.Constant) and isinstance(keyword.value.value, str):
-                                if keyword.arg == 'check_id':
+                            if isinstance(keyword.value, ast.Constant) and isinstance(
+                                keyword.value.value, str
+                            ):
+                                if keyword.arg == "check_id":
                                     check_id = keyword.value.value
-                                elif keyword.arg == 'description':
+                                elif keyword.arg == "description":
                                     description = keyword.value.value
-                            elif hasattr(ast, 'Str') and isinstance(keyword.value, ast.Str):
-                                if keyword.arg == 'check_id':
+                            elif hasattr(ast, "Str") and isinstance(
+                                keyword.value, ast.Str
+                            ):
+                                if keyword.arg == "check_id":
                                     check_id = keyword.value.s
-                                elif keyword.arg == 'description':
+                                elif keyword.arg == "description":
                                     description = keyword.value.s
                         if check_id is not None and description is not None:
-                            check_info_list.append({
-                                'check_id': check_id,
-                                'description': description
-                            })
+                            check_info_list.append(
+                                {"check_id": check_id, "description": description}
+                            )
     return check_info_list
 
 
@@ -53,7 +60,9 @@ def get_check_id_and_description_pairs() -> list[dict[str, str]]:
         A list of dictionaries, each containing a 'check_id' and 'description'.
     """
     try:
-        with importlib.resources.files(__package__).joinpath("checks.py").open("r", encoding="utf-8") as f:
+        with importlib.resources.files(__package__).joinpath("checks.py").open(
+            "r", encoding="utf-8"
+        ) as f:
             code = f.read()
             return extract_check_info_from_code(code)
     except Exception as e:

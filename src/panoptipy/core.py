@@ -409,6 +409,30 @@ class Scanner:
         """
         return self.rating_calculator.calculate_rating(results)
 
+    def scan_multiple(self, paths: List[Path]) -> Dict[Path, List[CheckResult]]:
+        """Scan multiple codebases sequentially.
+
+        Args:
+            paths: List of paths to codebases to scan
+
+        Returns:
+            Dictionary mapping paths to their check results
+        """
+        logger.info(f"Starting sequential scan of {len(paths)} repositories")
+        results = {}
+
+        for path in paths:
+            logger.info(f"Scanning repository: {path}")
+            try:
+                repo_results = self.scan(path)
+                results[path] = repo_results
+            except Exception as e:
+                logger.error(f"Error scanning repository {path}: {e}")
+                # Create an empty result set for this repo
+                results[path] = []
+
+        return results
+
 
 def pattern_matches(pattern: str, check_id: str) -> bool:
     """Check if a pattern matches a check ID.
@@ -431,3 +455,32 @@ def pattern_matches(pattern: str, check_id: str) -> bool:
     # Convert glob pattern to regex
     regex_pattern = "^" + re.escape(pattern).replace("\\*", ".*") + "$"
     return bool(re.match(regex_pattern, check_id))
+
+
+def _scan_single_repo(path_config_tuple):
+    """Helper function to scan a single repository in a separate process.
+
+    Args:
+        path_config_tuple: Tuple of (path, config_dict)
+
+    Returns:
+        Tuple of (path, scan_results)
+    """
+    try:
+        path, config_dict = path_config_tuple
+
+        # Reconstruct the Config object
+        config = Config.from_dict(config_dict)
+
+        # Create a new Scanner instance in this process
+        registry = CheckRegistry(config=config)
+        registry.load_builtin_checks()
+        registry.load_plugins()
+        scanner = Scanner(registry, config)
+
+        return path, scanner.scan(path)
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).error(f"Error scanning repository {path}: {e}")
+        return path, []

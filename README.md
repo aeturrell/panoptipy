@@ -4,4 +4,4 @@ A Python Package for Static Code Quality Assessment. Use it to analyse your repo
 
 > ⚠️ Under development; use not currently recommended
 
-![panoptipy logo](docs/logo.svg){width=10%}
+![panoptipy logo](docs/logo.svg)

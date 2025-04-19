@@ -1,6 +1,6 @@
 # config.py
 from pathlib import Path
-from typing import Any, Optional  # Added Any for broader type hints if needed
+from typing import Any, Dict, Optional  # Added Any for broader type hints if needed
 
 # Use 'tomli' for reading TOML, it's the standard library module in Python 3.11+
 # and recommended for earlier versions. Fallback to 'toml' if needed.
@@ -115,3 +115,71 @@ class Config:
         # or if the retrieved value is not a list.
         value = self.get(f"checks.{pattern_type}", [])
         return value if isinstance(value, list) else []
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the config to a dictionary for serialization.
+
+        Returns:
+            Dictionary representation of the config
+        """
+        # Based on the provided DEFAULT_CONFIG structure
+        config_dict = {
+            "checks": {
+                "enabled": self.get("checks.enabled", ["*"]),
+                "disabled": self.get("checks.disabled", []),
+                "critical": self.get("checks.critical", []),
+            },
+            "reporters": {
+                "enabled": self.get("reporters.enabled", ["console"]),
+                "show_details": self.get("reporters.show_details", True),
+            },
+            "thresholds": {
+                "max_file_size": self.get("thresholds.max_file_size", 500),
+            },
+        }
+
+        # Include any custom configs that might have been added
+        if hasattr(self, "_config"):
+            # Recursively merge any additional config items
+            def deep_merge(source, destination):
+                for key, value in source.items():
+                    if isinstance(value, dict):
+                        # get node or create one
+                        node = destination.setdefault(key, {})
+                        deep_merge(value, node)
+                    else:
+                        destination[key] = value
+                return destination
+
+            # Start with our known structure and merge in any custom items
+            custom_config = self._config.copy() if hasattr(self, "_config") else {}
+            config_dict = deep_merge(custom_config, config_dict)
+
+        return config_dict
+
+    @classmethod
+    def from_dict(cls, config_dict: Dict[str, Any]) -> "Config":
+        """Create a Config object from a dictionary.
+
+        Args:
+            config_dict: Dictionary representation of the config
+
+        Returns:
+            Config object
+        """
+        config = cls()
+
+        # If your Config class stores the config in _config attribute:
+        if hasattr(config, "_config"):
+            config._config = config_dict.copy()
+        else:
+            # Alternative approach if Config doesn't use _config:
+            # This assumes you have a method to update config values
+            for section, values in config_dict.items():
+                if isinstance(values, dict):
+                    for key, value in values.items():
+                        config.set(f"{section}.{key}", value)
+                else:
+                    config.set(section, values)
+
+        return config

@@ -1,6 +1,7 @@
 """Console reporter for panoptipy using Rich for terminal output."""
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from rich.console import Console
 from rich.emoji import Emoji
@@ -13,8 +14,10 @@ if TYPE_CHECKING:
     from ..checks import CheckResult
     from ..rating import CodebaseRating
 
+from .base_reporter import BaseReporter
 
-class ConsoleReporter:
+
+class ConsoleReporter(BaseReporter):
     """Reporter that formats check results for the console using Rich."""
 
     # Status symbols and colors for different check statuses
@@ -45,25 +48,38 @@ class ConsoleReporter:
         self.use_emoji = use_emoji
         self.show_details = show_details
 
-    def report(self, results: List["CheckResult"], rating: "CodebaseRating") -> None:
-        """Generate a console report of check results.
+    def report(
+        self,
+        results: Union[List["CheckResult"], Dict[Path, List["CheckResult"]]],
+        rating: Optional["CodebaseRating"] = None,
+        repo_path: Optional[Path] = None,
+    ) -> None:
+        """Generate a console report for check results.
 
         Args:
-            results: List of check results
+            results: Either a list of check results or a dictionary mapping paths to results
             rating: Overall rating for the codebase
+            repo_path: Path to the repository being reported
         """
-        # Display overall rating
-        self._display_rating(rating)
-
-        # Display summary statistics
-        self._display_summary(results)
-
-        # Display results table
-        self._display_results_table(results)
-
-        # Display detailed information for failures if requested
-        if self.show_details:
-            self._display_details(results)
+        # Handle both list and dictionary inputs
+        if isinstance(results, dict):
+            # Multiple repositories
+            for repo_path, repo_results in results.items():
+                self.console.print(f"\n[bold blue]Repository:[/bold blue] {repo_path}")
+                self._display_rating(rating)
+                self._display_summary(repo_results)
+                self._display_results_table(repo_results, repo_path)
+                if self.show_details:
+                    self._display_details(repo_results, repo_path)
+        else:
+            # Single repository
+            if repo_path:
+                self.console.print(f"\n[bold blue]Repository:[/bold blue] {repo_path}")
+            self._display_rating(rating)
+            self._display_summary(results)
+            self._display_results_table(results, repo_path)
+            if self.show_details:
+                self._display_details(results, repo_path)
 
     def report_with_progress(self, checks: List[str]) -> None:
         """Display a progress indicator while checks are running.
@@ -138,13 +154,16 @@ class ConsoleReporter:
             f"Pass rate: [bold {color}]{pass_percentage:.1f}%[/bold {color}]"
         )
 
-    def _display_results_table(self, results: List["CheckResult"]) -> None:
+    def _display_results_table(
+        self, results: List["CheckResult"], repo_path: Path
+    ) -> None:
         """Display a table of check results.
 
         Args:
             results: List of check results
+            repo_path: Path to the repository
         """
-        table = Table(title="\nCheck Results")
+        table = Table(title=f"\nCheck Results for {repo_path}")
 
         # Add columns
         table.add_column("Status", justify="center", width=8)
@@ -192,11 +211,12 @@ class ConsoleReporter:
 
         self.console.print(table)
 
-    def _display_details(self, results: List["CheckResult"]) -> None:
+    def _display_details(self, results: List["CheckResult"], repo_path: Path) -> None:
         """Display detailed information for failed and warning checks.
 
         Args:
             results: List of check results
+            repo_path: Path to the repository
         """
         # Filter for results with details
         detailed_results = [

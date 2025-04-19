@@ -419,16 +419,17 @@ class Scanner:
             Dictionary mapping paths to their check results
         """
         logger.info(f"Starting sequential scan of {len(paths)} repositories")
-        results = {}
+        results: Dict[Path, List[CheckResult]] = {}
+        ratings: Dict[Path, CodebaseRating] = {}
 
         for path in paths:
             logger.info(f"Scanning repository: {path}")
             try:
                 repo_results = self.scan(path)
                 results[path] = repo_results
+                ratings[path] = self.rate(repo_results)
             except Exception as e:
                 logger.error(f"Error scanning repository {path}: {e}")
-                # Create an empty result set for this repo
                 results[path] = []
 
         return results

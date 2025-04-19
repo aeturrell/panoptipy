@@ -55,27 +55,27 @@ def scan(paths, config, format, aggregate):
     # Scan repositories
     combined_results = scanner.scan_multiple([Path(path) for path in paths])
 
-    # Create aggregated report if requested, otherwise individual reports
+    # Create reporter
     reporter = get_reporter(format, config=config_obj)
 
     if aggregate:
-        # Flatten all results and calculate overall rating
+        # Create a single report for all repositories
         all_results = [
             result
             for repo_results in combined_results.values()
             for result in repo_results
         ]
         overall_rating = scanner.rate(all_results)
-        reporter.report_multiple(combined_results, overall_rating)
+        # Pass dictionary for multiple repos
+        reporter.report(combined_results, overall_rating)
     else:
         # Report each repository separately
         has_critical_failures = False
         for path, results in combined_results.items():
             rating = scanner.rate(results)
-            print(
-                f"\n-------------------------------\n     Results for {path}     \n-------------------------------"
-            )
-            reporter.report(results, rating)
+
+            # Pass list for single repo
+            reporter.report(results, rating, repo_path=path)
 
             # Check for critical failures in this repo
             repo_critical_failures = any(

@@ -20,6 +20,7 @@ dependencies = [
     "nbstripout>=0.8.1",
     "pluggy>=1.5.0",
     "pre-commit>=4.2.0",
+    "pyarrow>=19.0.1",
     "pydoclint>=0.6.6",
     "quartodoc>=0.9.1",
     "rich>=14.0.0",

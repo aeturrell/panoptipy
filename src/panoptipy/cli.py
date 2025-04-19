@@ -33,7 +33,12 @@ def cli():
     default=False,
     help="Aggregate results across all repositories",
 )
-def scan(paths, config, format, aggregate):
+@click.option(
+    "--output",
+    type=click.Path(path_type=Path),
+    help="Output file path (required for parquet format)",
+)
+def scan(paths, config, format, aggregate, output):
     """Scan one or more local codebases for code quality issues.
 
     PATHS: One or more paths to codebases (directories) to scan.
@@ -56,7 +61,10 @@ def scan(paths, config, format, aggregate):
     combined_results = scanner.scan_multiple([Path(path) for path in paths])
 
     # Create reporter
-    reporter = get_reporter(format, config=config_obj)
+    reporter = get_reporter(
+        format=format,
+        output_path=output if format == "parquet" else None,
+    )
 
     if aggregate:
         # Create a single report for all repositories

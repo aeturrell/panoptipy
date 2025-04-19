@@ -1,17 +1,27 @@
 """Reporter functionality for panoptipy."""
 
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal, Optional, Union
 
 from ..config import Config
-from .console import create_reporter as create_console_reporter
-from .json import create_reporter as create_json_reporter
+from .console import ConsoleReporter
+from .json import JSONReporter
+from .parquet import ParquetReporter
+
+ReporterFormat = Literal["console", "json", "parquet"]
 
 
-def get_reporter(format: str = "console", config: Config = None, **kwargs: Any) -> Any:
+def get_reporter(
+    format: ReporterFormat = "console",
+    output_path: Optional[Path] = None,
+    config: Config = None,
+    **kwargs: Any,
+) -> Union[ConsoleReporter, JSONReporter, ParquetReporter]:
     """Get a reporter instance based on the specified format.
 
     Args:
-        format: Output format ("console", "html", or "json")
+        format: Output format ("console", "json", or "parquet")
+        output_path: Path for output file (required for parquet format)
         config: Configuration object
         **kwargs: Additional keyword arguments to pass to the reporter
 
@@ -26,10 +36,12 @@ def get_reporter(format: str = "console", config: Config = None, **kwargs: Any) 
         kwargs["show_details"] = config.get("reporters.show_details", True)
 
     if format == "console":
-        return create_console_reporter(**kwargs)
-    elif format == "html":
-        raise NotImplementedError("HTML reporter not yet implemented")
+        return ConsoleReporter(**kwargs)
     elif format == "json":
-        return create_json_reporter(**kwargs)
+        return JSONReporter(**kwargs)
+    elif format == "parquet":
+        if not output_path:
+            raise ValueError("output_path is required for parquet format")
+        return ParquetReporter(output_path=output_path, **kwargs)
     else:
-        raise ValueError(f"Unsupported reporter format: {format}")
+        raise ValueError(f"Unknown reporter format: {format}")

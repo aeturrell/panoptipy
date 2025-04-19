@@ -1,5 +1,7 @@
 import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Callable, Dict, List, Optional
 
 import click
 
@@ -10,11 +12,11 @@ from .github import GitHubClient, GitHubScanner
 from .registry import CheckRegistry
 from .reporters import get_reporter
 
-reporters_accepting_output_paths = ["json", "parquet"]
+reporters_accepting_output_paths: List[str] = ["json", "parquet"]
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """PanoptiPy - Python code quality assessment tool."""
     pass
 
@@ -42,7 +44,7 @@ def common_output_options(func):
     return func
 
 
-def github_scan_options(func):
+def github_scan_options(func: Callable) -> Callable:
     options = [
         click.option(
             "--token",
@@ -67,7 +69,13 @@ def github_scan_options(func):
     return func
 
 
-def run_scan(scan_sources, config_path, format, output, critical_check_ids):
+def run_scan(
+    scan_sources: Callable[[Scanner], Dict[Path, list]],
+    config_path: Optional[str],
+    format: str,
+    output: Optional[Path],
+    critical_check_ids: List[str],
+) -> None:
     config_obj = Config.load(Path(config_path) if config_path else None)
     registry = CheckRegistry(config=config_obj)
     registry.load_builtin_checks()
@@ -95,7 +103,12 @@ def run_scan(scan_sources, config_path, format, output, critical_check_ids):
 @cli.command()
 @click.argument("paths", type=click.Path(exists=True), nargs=-1, required=True)
 @common_output_options
-def scan(paths, config, format, output):
+def scan(
+    paths: Sequence[str],
+    config: Optional[str],
+    format: str,
+    output: Optional[Path],
+) -> None:
     """Scan one or more local codebases for code quality issues."""
 
     def scan_sources(scanner):
@@ -116,15 +129,15 @@ def scan(paths, config, format, output):
     help="Include private repositories (requires token with private repo access)",
 )
 def scan_user(
-    username,
-    config,
-    format,
-    output,
-    include_private,
-    exclude_forks,
-    max_repos,
-    token,
-):
+    username: str,
+    config: Optional[str],
+    format: str,
+    output: Optional[Path],
+    include_private: bool,
+    exclude_forks: bool,
+    max_repos: Optional[int],
+    token: Optional[str],
+) -> None:
     """Scan public repositories of a GitHub user."""
     if not token:
         click.echo("Error: GitHub token is required.", err=True)
@@ -161,7 +174,16 @@ def scan_user(
 @click.argument("team", type=str, required=True)
 @common_output_options
 @github_scan_options
-def scan_team(org, team, config, format, output, exclude_forks, max_repos, token):
+def scan_team(
+    org: str,
+    team: str,
+    config: Optional[str],
+    format: str,
+    output: Optional[Path],
+    exclude_forks: bool,
+    max_repos: Optional[int],
+    token: Optional[str],
+) -> None:
     """Scan repositories accessible to a team within a GitHub organization."""
     if not token:
         click.echo("Error: GitHub token is required.", err=True)

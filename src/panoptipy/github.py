@@ -9,7 +9,7 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import requests
 from git import Repo
@@ -49,7 +49,9 @@ class GitHubClient:
             "Content-Type": "application/json",
         }
 
-    def execute_query(self, query: str, variables: Optional[Dict] = None) -> Dict:
+    def execute_query(
+        self, query: str, variables: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Execute a GraphQL query against GitHub API.
 
         Args:
@@ -266,11 +268,11 @@ class GitHubScanner:
     def scan_user_repositories(
         self,
         username: str,
-        scanner_func,
+        scanner_func: Callable[[Path], List[Any]],
         include_private: str = "PUBLIC",
         exclude_forks: bool = True,
         max_repos: Optional[int] = None,
-    ) -> Dict[Path, List]:
+    ) -> Dict[Path, List[Any]]:
         """Scan repositories owned by a GitHub user.
 
         Args:
@@ -309,10 +311,10 @@ class GitHubScanner:
         self,
         org: str,
         team_slug: str,
-        scanner_func,
+        scanner_func: Callable[[Path], List[Any]],
         exclude_forks: bool = True,
         max_repos: Optional[int] = None,
-    ) -> Dict[Path, List]:
+    ) -> Dict[Path, List[Any]]:
         """Scan repositories accessible to a team within an organization.
 
         Args:

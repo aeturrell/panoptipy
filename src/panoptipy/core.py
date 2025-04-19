@@ -10,7 +10,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .checks import CheckResult, CheckStatus
 from .config import Config
@@ -48,10 +48,10 @@ class FileInfo:
 class PythonModule:
     """Represents a Python module for analysis."""
 
-    def __init__(self, file_info: FileInfo):
-        self.file_info = file_info
-        self.path = file_info.path
-        self.content = file_info.content
+    def __init__(self, file_info: FileInfo) -> None:
+        self.file_info: FileInfo = file_info
+        self.path: Path = file_info.path
+        self.content: str = file_info.content
         self._ast: Optional[ast.Module] = None
 
     @property
@@ -66,7 +66,7 @@ class PythonModule:
                 self._ast = ast.Module(body=[], type_ignores=[])
         return self._ast
 
-    def get_public_items(self) -> List[Dict[str, Any]]:
+    def get_public_items(self) -> List[Dict[str, Union[str, int, Optional[str]]]]:
         """Get all public functions, classes, and methods."""
         items = []
 
@@ -96,7 +96,7 @@ class PythonModule:
 class Codebase:
     """Represents a codebase for analysis, including only files tracked by Git."""
 
-    def __init__(self, root_path: Path):
+    def __init__(self, root_path: Path) -> None:
         """Initialize a codebase from a root directory.
 
         Only files tracked by Git within this path will be included.
@@ -113,7 +113,7 @@ class Codebase:
                 f"Root path does not exist or is not a directory: {root_path}"
             )
 
-        self.root_path = root_path.absolute()
+        self.root_path: Path = root_path.absolute()
         self._files: Dict[Path, FileInfo] = {}
         self._python_modules: Dict[Path, PythonModule] = {}
 
@@ -314,18 +314,18 @@ class Codebase:
 class Scanner:
     """Main scanner that runs checks against a codebase."""
 
-    def __init__(self, registry: CheckRegistry, config: Config):
+    def __init__(self, registry: CheckRegistry, config: Config) -> None:
         """Initialize a scanner with a check registry and configuration.
 
         Args:
             registry: Registry containing checks to run
             config: Configuration for the scanner
         """
-        self.registry = registry
-        self.config = config
-        self.rating_calculator = RatingCalculator(config)
+        self.registry: CheckRegistry = registry
+        self.config: Config = config
+        self.rating_calculator: RatingCalculator = RatingCalculator(config)
 
-    def _get_enabled_checks(self) -> List[Any]:
+    def _get_enabled_checks(self) -> List[Any]:  # Consider creating a Check type
         """Get the list of enabled checks based on configuration.
 
         Returns:
@@ -458,7 +458,9 @@ def pattern_matches(pattern: str, check_id: str) -> bool:
     return bool(re.match(regex_pattern, check_id))
 
 
-def _scan_single_repo(path_config_tuple):
+def _scan_single_repo(
+    path_config_tuple: Tuple[Path, Dict[str, Any]],
+) -> Tuple[Path, List[CheckResult]]:
     """Helper function to scan a single repository in a separate process.
 
     Args:

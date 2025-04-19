@@ -46,6 +46,7 @@ dev = [
     "pandas>=2.2.3",
     "great-tables>=0.17.0",
     "python-dotenv>=1.1.0",
+    "typeguard>=4.4.2",
 ]
 
 [project.scripts]

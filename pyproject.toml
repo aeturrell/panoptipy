@@ -45,6 +45,7 @@ dev = [
     "ipykernel>=6.29.5",
     "pandas>=2.2.3",
     "great-tables>=0.17.0",
+    "python-dotenv>=1.1.0",
 ]
 
 [project.scripts]

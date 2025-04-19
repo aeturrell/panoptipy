@@ -5,6 +5,7 @@ import os
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple
 
 import toml
@@ -34,6 +35,7 @@ class CheckResult:
     check_id: str
     status: CheckStatus  # Enum: PASS, FAIL, WARNING, SKIP, ERROR
     message: str
+    repo_path: Optional[Path] = None
     details: Optional[Dict[str, Any]] = None
 
 

@@ -17,7 +17,7 @@ def cli():
 
 
 @cli.command()
-@click.argument("path", type=click.Path(exists=True))
+@click.argument("paths", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option(
     "--config", "-c", type=click.Path(exists=True), help="Path to config file"
 )
@@ -28,8 +28,16 @@ def cli():
     default="console",
     help="Output format (console, html, json)",
 )
-def scan(path, config, format):
-    """Scan a local codebase for code quality issues."""
+@click.option(
+    "--aggregate/--no-aggregate",
+    default=False,
+    help="Aggregate results across all repositories",
+)
+def scan(paths, config, format, aggregate):
+    """Scan one or more local codebases for code quality issues.
+
+    PATHS: One or more paths to codebases (directories) to scan.
+    """
     # Load configuration
     config_obj = Config.load(Path(config) if config else None)
 
@@ -41,16 +49,49 @@ def scan(path, config, format):
     registry.load_builtin_checks()
     registry.load_plugins()
 
-    # Run scan
+    # Create scanner
     scanner = Scanner(registry, config_obj)
-    results = scanner.scan(Path(path))
 
-    # Generate report
+    # Scan repositories
+    combined_results = scanner.scan_multiple([Path(path) for path in paths])
+
+    # Create reporter
     reporter = get_reporter(format, config=config_obj)
-    reporter.report(results, scanner.rate(results))
+
+    if aggregate:
+        # Create a single report for all repositories
+        all_results = [
+            result
+            for repo_results in combined_results.values()
+            for result in repo_results
+        ]
+        overall_rating = scanner.rate(all_results)
+        # Pass dictionary for multiple repos
+        reporter.report(combined_results, overall_rating)
+    else:
+        # Report each repository separately
+        has_critical_failures = False
+        for path, results in combined_results.items():
+            rating = scanner.rate(results)
+
+            # Pass list for single repo
+            reporter.report(results, rating, repo_path=path)
+
+            # Check for critical failures in this repo
+            repo_critical_failures = any(
+                r.status == CheckStatus.FAIL and r.check_id in critical_checks
+                for r in results
+            )
+            has_critical_failures = has_critical_failures or repo_critical_failures
 
     # Return appropriate exit code
-    critical_failures = any(
-        r.status == CheckStatus.FAIL and r.check_id in critical_checks for r in results
-    )
-    sys.exit(1 if critical_failures else 0)
+    if aggregate:
+        # Check for any critical failures across all repos
+        critical_failures = any(
+            r.status == CheckStatus.FAIL and r.check_id in critical_checks
+            for repo_results in combined_results.values()
+            for r in repo_results
+        )
+        sys.exit(1 if critical_failures else 0)
+    else:
+        sys.exit(1 if has_critical_failures else 0)

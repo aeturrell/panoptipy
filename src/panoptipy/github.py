@@ -127,7 +127,7 @@ class GitHubClient:
 
             for repo_data in repos_data:
                 # Skip private repos if not requested
-                if repo_data["isPrivate"] and include_private!="PRIVATE":
+                if repo_data["isPrivate"] and include_private != "PRIVATE":
                     continue
 
                 repos.append(

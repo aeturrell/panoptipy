@@ -10,6 +10,8 @@ from .github import GitHubClient, GitHubScanner
 from .registry import CheckRegistry
 from .reporters import get_reporter
 
+reporters_accepting_output_paths = ["json", "parquet"]
+
 
 @click.group()
 def cli():
@@ -37,7 +39,7 @@ def cli():
 @click.option(
     "--output",
     type=click.Path(path_type=Path),
-    help="Output file path (required for parquet format)",
+    help="Output file path (required for parquet format; optional for json)",
 )
 def scan(paths, config, format, aggregate, output):
     """Scan one or more local codebases for code quality issues.
@@ -64,7 +66,7 @@ def scan(paths, config, format, aggregate, output):
     # Create reporter
     reporter = get_reporter(
         format=format,
-        output_path=output if format == "parquet" else None,
+        output_path=output if format in reporters_accepting_output_paths else None,
     )
 
     if aggregate:
@@ -126,7 +128,7 @@ def scan(paths, config, format, aggregate, output):
 @click.option(
     "--output",
     type=click.Path(path_type=Path),
-    help="Output file path (required for parquet format)",
+    help="Output file path (required for parquet format; optional for json)",
 )
 @click.option(
     "--include-private/--public-only",
@@ -209,7 +211,7 @@ def scan_user(
     # Create reporter
     reporter = get_reporter(
         format=format,
-        output_path=output if format == "parquet" else None,
+        output_path=output if format in reporters_accepting_output_paths else None,
     )
 
     if aggregate:
@@ -272,7 +274,7 @@ def scan_user(
 @click.option(
     "--output",
     type=click.Path(path_type=Path),
-    help="Output file path (required for parquet format)",
+    help="Output file path (required for parquet format; optional for JSON)",
 )
 @click.option(
     "--exclude-forks/--include-forks",
@@ -338,7 +340,7 @@ def scan_team(
     # Create reporter
     reporter = get_reporter(
         format=format,
-        output_path=output if format == "parquet" else None,
+        output_path=output if format in reporters_accepting_output_paths else None,
     )
 
     if aggregate:

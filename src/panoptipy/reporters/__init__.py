@@ -38,7 +38,7 @@ def get_reporter(
     if format == "console":
         return ConsoleReporter(**kwargs)
     elif format == "json":
-        return JSONReporter(**kwargs)
+        return JSONReporter(output_path=output_path, **kwargs)
     elif format == "parquet":
         if not output_path:
             raise ValueError("output_path is required for parquet format")

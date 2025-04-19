@@ -8,19 +8,23 @@ if TYPE_CHECKING:
     from ..checks import CheckResult
     from ..rating import CodebaseRating
 
+from rich import print_json
+
 from .base_reporter import BaseReporter
 
 
 class JSONReporter(BaseReporter):
     """Reporter that outputs check results in JSON format."""
 
-    def __init__(self, show_details: bool = False):
+    def __init__(self, show_details: bool = False, output_path: Optional[Path] = None):
         """Initialize the JSON reporter.
 
         Args:
             show_details: Whether to include detailed information in output
+            output_path: Optional path to write JSON output to (stdout if None)
         """
         self.show_details = show_details
+        self.output_path = output_path
 
     def report(
         self,
@@ -56,7 +60,14 @@ class JSONReporter(BaseReporter):
                 "results": self._serialize_results(results),
             }
 
-        print(json.dumps(report_data, indent=2))
+        json_output = json.dumps(report_data, indent=2)
+        if self.output_path:
+            # Write to file if output path is provided
+            with open(self.output_path, "w") as f:
+                f.write(json_output)
+        else:
+            # Default to stdout
+            print_json(json_output)
 
     def _get_rating_value(self, rating: Optional["CodebaseRating"]) -> Optional[str]:
         """Safely get rating value, handling None case."""
@@ -101,13 +112,16 @@ class JSONReporter(BaseReporter):
         ]
 
 
-def create_reporter(show_details: bool = False) -> JSONReporter:
+def create_reporter(
+    show_details: bool = False, output_path: Optional[Path] = None
+) -> JSONReporter:
     """Create a JSON reporter with the specified options.
 
     Args:
         show_details: Whether to include detailed information in output
+        output_path: Optional path to write JSON output to (stdout if None)
 
     Returns:
         Configured JSON reporter
     """
-    return JSONReporter(show_details=show_details)
+    return JSONReporter(show_details=show_details, output_path=output_path)

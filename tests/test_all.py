@@ -4,6 +4,18 @@ import pytest
 import toml
 
 
+def test_cli_without_config():
+    """Test that CLI works with default configuration."""
+    result = subprocess.run(
+        ["panoptipy", "scan", "."],
+        capture_output=True,
+        text=True,
+    )
+
+    # Check that the command executed
+    assert result.returncode in (0, 1), f"CLI failed: {result.stderr}"
+
+
 @pytest.fixture
 def config_file(tmp_path):
     """Create a temporary TOML config file."""
@@ -48,18 +60,6 @@ def test_cli_with_config(config_file):
         assert result.returncode == 1, "Expected failure due to critical check"
 
 
-def test_cli_without_config():
-    """Test that CLI works with default configuration."""
-    result = subprocess.run(
-        ["panoptipy", "scan", "."],
-        capture_output=True,
-        text=True,
-    )
-
-    # Check that the command executed
-    assert result.returncode in (0, 1), f"CLI failed: {result.stderr}"
-
-
 def test_cli_with_invalid_config(tmp_path):
     """Test that CLI handles invalid configuration gracefully."""
     invalid_config = tmp_path / "invalid.toml"
@@ -75,3 +75,27 @@ def test_cli_with_invalid_config(tmp_path):
     # Should fail gracefully with error message
     assert result.returncode != 0
     assert "Error" in (result.stderr + result.stdout)
+
+
+def test_cli_format_options():
+    """Test that CLI correctly handles different output formats."""
+    # Test JSON format
+    json_result = subprocess.run(
+        ["panoptipy", "scan", ".", "--format=json"],
+        capture_output=True,
+        text=True,
+    )
+    assert json_result.returncode in (0, 1), f"CLI failed: {json_result.stderr}"
+    assert json_result.stdout.strip().startswith(
+        "{"
+    ), "JSON output should start with '{'"
+    assert json_result.stdout.strip().endswith("}"), "JSON output should end with '}'"
+
+    # Test invalid format
+    invalid_result = subprocess.run(
+        ["panoptipy", "scan", ".", "--format=invalid"],
+        capture_output=True,
+        text=True,
+    )
+    assert invalid_result.returncode != 0, "Should fail with invalid format"
+    assert "Error" in (invalid_result.stderr + invalid_result.stdout)

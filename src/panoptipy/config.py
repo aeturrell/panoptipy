@@ -29,7 +29,7 @@ class Config:
             "show_details": True,
         },
         "thresholds": {
-            "max_file_size": 1000,
+            "max_file_size": 500,
         },
     }
 

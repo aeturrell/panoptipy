@@ -52,7 +52,8 @@ dev = [
 [project.scripts]
 panoptipy = "panoptipy.cli:cli"
 
-
+[tool.uv]
+package = true
 
 [tool.mypy]
 strict = false

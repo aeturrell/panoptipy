@@ -71,11 +71,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  docs:
-    needs: release
-    name: docs
-    runs-on: ubuntu-latest
-    steps:
       - name: Install dependencies
         run: |
           uv sync --extra dev

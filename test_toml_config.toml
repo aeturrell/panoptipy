@@ -1,5 +1,0 @@
-[tool.panoptipy]
-checks = { enabled = ["large_files"], disabled = [], critical = ["ruff_linting"] }
-
-[tool.panoptipy.thresholds]
-max_file_size = 1000

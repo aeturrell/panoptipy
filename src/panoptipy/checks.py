@@ -120,7 +120,7 @@ def fail_result(
 
 
 class DocstringCheck(Check):
-    """Check to ensure proper documentation through docstrings in Python codebase.
+    """Check to ensure documentation included via docstrings in Python codebase.
 
     This class implements a check that verifies the presence of docstrings for all public
     functions and classes in a Python codebase, excluding test files and test-related items.
@@ -255,7 +255,7 @@ class RuffLintingCheck(Check):
 class RuffFormatCheck(Check):
     """A check class that verifies code formatting using ruff format.
 
-    This class implements a check to ensure that code follows proper formatting
+    This class implements a check to ensure that code follows formatting
     according to ruff format standards. It runs the 'ruff format --check' command
     on the codebase and reports any formatting inconsistencies.
 
@@ -317,9 +317,7 @@ class RuffFormatCheck(Check):
                 details={"issues": issues, "issue_count": issue_count},
             )
 
-        return success_result(
-            check_id=self.check_id, message="All files are properly formatted"
-        )
+        return success_result(check_id=self.check_id, message="All files are formatted")
 
     def run(self, codebase: "Codebase") -> CheckResult:
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
@@ -562,7 +560,7 @@ class NotebookOutputCheck(Check):
 
         return success_result(
             check_id=self.check_id,
-            message="All notebooks are properly stripped of outputs and excess metadata",
+            message="All notebooks are stripped of outputs and excess metadata",
         )
 
     def run(self, codebase: "Codebase") -> CheckResult:

@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from rich import box
 from rich.console import Console
 from rich.emoji import Emoji
 from rich.panel import Panel
@@ -202,12 +203,26 @@ class ConsoleReporter(BaseReporter):
             results: List of check results
             repo_path: Path to the repository
         """
-        table = Table(title=f"\nCheck Results for {repo_path}")
+        table = Table(
+            title=f"\nCheck Results for {repo_path}",
+            box=box.ROUNDED,  # Explicitly set box style
+            show_header=True,
+            header_style="bold magenta",
+            # expand=True makes the table use the full available width
+            # This can sometimes help distribute space more evenly
+            expand=True,
+        )
 
-        # Add columns
-        table.add_column("Status", justify="center", width=8)
-        table.add_column("Check ID", style="cyan")
-        table.add_column("Message")
+        # Add columns with more explicit width control
+        table.add_column(
+            "Status", justify="center", style="dim", width=8
+        )  # Keep fixed width for status symbol
+        table.add_column(
+            "Check ID", style="cyan", min_width=15, ratio=1
+        )  # Give Check ID some space, let it expand
+        table.add_column(
+            "Message", ratio=3
+        )  # Let Message take the most space proportionally
 
         # Sort results: failures first, then warnings, then passes
         sorted_results = sorted(

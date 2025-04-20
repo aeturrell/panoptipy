@@ -46,6 +46,7 @@ dev = [
     "great-tables>=0.17.0",
     "python-dotenv>=1.1.0",
     "typeguard>=4.4.2",
+    "nbformat>=5.10.4",
 ]
 
 [project.scripts]

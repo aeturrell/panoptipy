@@ -1509,7 +1509,7 @@ wheels = [
 
 [[package]]
 name = "panoptipy"
-version = "0.0.1"
+version = "0.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -1534,6 +1534,7 @@ dev = [
     { name = "great-tables" },
     { name = "ipykernel" },
     { name = "jupyter" },
+    { name = "nbformat" },
     { name = "nox" },
     { name = "pandas" },
     { name = "pre-commit-hooks" },
@@ -1571,6 +1572,7 @@ dev = [
     { name = "great-tables", specifier = ">=0.17.0" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "jupyter", specifier = ">=1.1.1" },
+    { name = "nbformat", specifier = ">=5.10.4" },
     { name = "nox", specifier = ">=2024.10.9" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pre-commit-hooks", specifier = ">=5.0.0" },

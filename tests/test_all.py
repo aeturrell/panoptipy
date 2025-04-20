@@ -1,4 +1,5 @@
 import subprocess
+
 import pytest
 import toml
 
@@ -6,10 +7,7 @@ import toml
 def run_command(command):
     """Helper to run command using Popen and return (stdout, stderr, returncode)."""
     process = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
     stdout, stderr = process.communicate()
     return stdout, stderr, process.returncode

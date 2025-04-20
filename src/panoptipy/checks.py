@@ -262,7 +262,6 @@ class RuffFormatCheck(Check):
     Attributes:
         check_id (str): Identifier for this check, set to "ruff_format"
         description (str): Description of what this check does
-
     """
 
     def __init__(self):
@@ -275,13 +274,25 @@ class RuffFormatCheck(Check):
     def category(self) -> str:
         return "formatting"
 
-    def _parse_line(self, line: str) -> Optional[Dict[str, Any]]:
-        if line and os.path.exists(line):
-            return {
-                "file": line,
-                "issue": "Formatting does not match ruff format style",
-            }
-        return None
+    def _extract_files_with_issues(self, output: str) -> List[Dict[str, Any]]:
+        """Extract files that would be reformatted from the output."""
+        import re
+
+        issues = []
+
+        # Find all lines matching the pattern "Would reformat: path/to/file.py"
+        file_matches = re.findall(r"Would reformat: (.*?)$", output, re.MULTILINE)
+
+        for file_path in file_matches:
+            file_path = file_path.strip()
+            if file_path and os.path.exists(file_path):
+                issues.append(
+                    {
+                        "file": file_path,
+                    }
+                )
+
+        return issues
 
     def _run_logic(self, codebase: "Codebase") -> CheckResult:
         root_dir = codebase.root_path
@@ -291,13 +302,21 @@ class RuffFormatCheck(Check):
             text=True,
             check=False,
         )
-        if result.returncode != 0:
-            issues = parse_tool_output(result.stdout, self._parse_line)
+
+        # Combine stdout and stderr for parsing
+        output = f"{result.stdout}\n{result.stderr}".strip()
+
+        # Extract files with issues
+        issues = self._extract_files_with_issues(output)
+        issue_count = len(issues)
+
+        if issue_count > 0 or result.returncode != 0:
             return fail_result(
                 check_id=self.check_id,
-                message=f"Found {len(issues)} files with formatting issues",
-                details={"issues": issues, "issue_count": len(issues)},
+                message=f"Found {issue_count} files with formatting issues",
+                details={"issues": issues, "issue_count": issue_count},
             )
+
         return success_result(
             check_id=self.check_id, message="All files are properly formatted"
         )

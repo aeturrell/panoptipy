@@ -50,7 +50,6 @@ def test_cli_with_config(config_file):
         ["panoptipy", "scan", ".", f"--config={config_file}"]
     )
 
-    print(stdout)
     # Check that the command executed
     assert returncode in (0, 1), f"CLI failed: {stderr}"
 

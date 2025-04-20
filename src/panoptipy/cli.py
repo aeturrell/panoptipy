@@ -86,6 +86,7 @@ def run_scan(
     reporter = get_reporter(
         format=format,
         output_path=output if format in reporters_accepting_output_paths else None,
+        config=config_obj,
     )
 
     has_critical_failures = False

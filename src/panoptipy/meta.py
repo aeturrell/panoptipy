@@ -60,9 +60,11 @@ def get_check_id_and_description_pairs() -> list[dict[str, str]]:
         A list of dictionaries, each containing a 'check_id' and 'description'.
     """
     try:
-        with importlib.resources.files(__package__).joinpath("checks.py").open(
-            "r", encoding="utf-8"
-        ) as f:
+        with (
+            importlib.resources.files(__package__)
+            .joinpath("checks.py")
+            .open("r", encoding="utf-8") as f
+        ):
             code = f.read()
             return extract_check_info_from_code(code)
     except Exception as e:

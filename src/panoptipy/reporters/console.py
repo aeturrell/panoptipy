@@ -44,9 +44,48 @@ class ConsoleReporter(BaseReporter):
             use_emoji: Whether to use emoji instead of simple symbols
             show_details: Whether to show detailed information for failures
         """
-        self.console = Console()
+        self.console = Console(force_terminal=True, color_system="auto", safe_box=True)
         self.use_emoji = use_emoji
         self.show_details = show_details
+
+        # Check if Unicode is supported
+        self.unicode_supported = self.console.encoding == "utf-8"
+
+        # Add ASCII fallbacks if Unicode isn't supported (Windows!!!)
+        if not self.unicode_supported:
+            # Update symbols with ASCII alternatives
+            self.STATUS_STYLES = {
+                "pass": {
+                    "symbol": "√",
+                    "ascii_symbol": "+",
+                    "color": "green",
+                    "emoji": "white_heavy_check_mark",
+                },
+                "fail": {
+                    "symbol": "✗",
+                    "ascii_symbol": "X",
+                    "color": "red",
+                    "emoji": "x",
+                },
+                "warning": {
+                    "symbol": "!",
+                    "ascii_symbol": "!",
+                    "color": "yellow",
+                    "emoji": "warning",
+                },
+                "skip": {
+                    "symbol": "-",
+                    "ascii_symbol": "-",
+                    "color": "blue",
+                    "emoji": "information",
+                },
+                "error": {
+                    "symbol": "?",
+                    "ascii_symbol": "?",
+                    "color": "magenta",
+                    "emoji": "question_mark",
+                },
+            }
 
     def report(
         self,
@@ -191,19 +230,25 @@ class ConsoleReporter(BaseReporter):
             status = result.status.value
             style_info = self.STATUS_STYLES.get(status, {})
 
-            # Create status indicator with proper styling
-            if self.use_emoji and "emoji" in style_info:
+            # Create status indicator
+            if self.use_emoji and "emoji" in style_info and self.unicode_supported:
                 try:
                     status_indicator = Emoji(style_info["emoji"])
                 except (KeyError, ValueError):
                     # Fall back to symbol if emoji fails
+                    symbol = style_info.get(
+                        "ascii_symbol" if not self.unicode_supported else "symbol", "?"
+                    )
                     status_indicator = Text(
-                        style_info.get("symbol", "?"),
+                        symbol,
                         style=style_info.get("color", "white"),
                     )
             else:
+                symbol = style_info.get(
+                    "ascii_symbol" if not self.unicode_supported else "symbol", "?"
+                )
                 status_indicator = Text(
-                    style_info.get("symbol", "?"),
+                    symbol,
                     style=style_info.get("color", "white"),
                 )
 

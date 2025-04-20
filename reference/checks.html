@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d75320580429fd03ccc14abf5aea7e44.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d1b12f2568ecbe55642fee6aa00bd082.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -182,6 +182,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">checks</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">cli</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -247,7 +253,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#panoptipy.checks.DocstringCheck">DocstringCheck</a></td>
-<td>Check to ensure proper documentation through docstrings in Python codebase.</td>
+<td>Check to ensure documentation included via docstrings in Python codebase.</td>
 </tr>
 <tr class="odd">
 <td><a href="#panoptipy.checks.LargeFilesCheck">LargeFilesCheck</a></td>
@@ -339,7 +345,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="panoptipy.checks.DocstringCheck" class="level3">
 <h3 class="anchored" data-anchor-id="panoptipy.checks.DocstringCheck">DocstringCheck</h3>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>checks.DocstringCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Check to ensure proper documentation through docstrings in Python codebase.</p>
+<p>Check to ensure documentation included via docstrings in Python codebase.</p>
 <p>This class implements a check that verifies the presence of docstrings for all public functions and classes in a Python codebase, excluding test files and test-related items. The check considers an item “public” if it doesn’t start with an underscore, and identifies test-related items through various common naming patterns.</p>
 <section id="attributes-1" class="level4 doc-section doc-section-attributes">
 <h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-1">Attributes</h4>
@@ -533,7 +539,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="panoptipy.checks.RuffFormatCheck">RuffFormatCheck</h3>
 <div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>checks.RuffFormatCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>A check class that verifies code formatting using ruff format.</p>
-<p>This class implements a check to ensure that code follows proper formatting according to ruff format standards. It runs the ‘ruff format –check’ command on the codebase and reports any formatting inconsistencies.</p>
+<p>This class implements a check to ensure that code follows formatting according to ruff format standards. It runs the ‘ruff format –check’ command on the codebase and reports any formatting inconsistencies.</p>
 <section id="attributes-6" class="level4 doc-section doc-section-attributes">
 <h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-6">Attributes</h4>
 <table class="caption-top table">

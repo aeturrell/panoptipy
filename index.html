@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d75320580429fd03ccc14abf5aea7e44.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-d1b12f2568ecbe55642fee6aa00bd082.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -161,18 +161,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#panoptipy" id="toc-panoptipy" class="nav-link active" data-scroll-target="#panoptipy">panoptipy</a>
   <ul class="collapse">
   <li><a href="#quickstart" id="toc-quickstart" class="nav-link" data-scroll-target="#quickstart">Quickstart</a></li>
-  <li><a href="#multiple-repositories" id="toc-multiple-repositories" class="nav-link" data-scroll-target="#multiple-repositories">Multiple Repositories</a></li>
-  <li><a href="#github-integration-examples" id="toc-github-integration-examples" class="nav-link" data-scroll-target="#github-integration-examples">GitHub Integration examples</a>
-  <ul class="collapse">
-  <li><a href="#scan-all-public-repos-of-a-user" id="toc-scan-all-public-repos-of-a-user" class="nav-link" data-scroll-target="#scan-all-public-repos-of-a-user">Scan all public repos of a user</a></li>
-  <li><a href="#scan-all-repositories-of-a-team-within-an-organisation" id="toc-scan-all-repositories-of-a-team-within-an-organisation" class="nav-link" data-scroll-target="#scan-all-repositories-of-a-team-within-an-organisation">Scan all repositories of a team within an organisation</a></li>
-  <li><a href="#scan-with-output-format-options" id="toc-scan-with-output-format-options" class="nav-link" data-scroll-target="#scan-with-output-format-options">Scan with output format options</a></li>
-  <li><a href="#scan-with-custom-configuration" id="toc-scan-with-custom-configuration" class="nav-link" data-scroll-target="#scan-with-custom-configuration">Scan with custom configuration</a></li>
-  <li><a href="#limit-results" id="toc-limit-results" class="nav-link" data-scroll-target="#limit-results">Limit results</a></li>
-  </ul></li>
-  <li><a href="#example-use-on-this-repo" id="toc-example-use-on-this-repo" class="nav-link" data-scroll-target="#example-use-on-this-repo">Example Use on This Repo!</a></li>
-  <li><a href="#available-checks" id="toc-available-checks" class="nav-link" data-scroll-target="#available-checks">Available Checks</a></li>
+  <li><a href="#what-is-panoptipy-for" id="toc-what-is-panoptipy-for" class="nav-link" data-scroll-target="#what-is-panoptipy-for">What is <strong>panoptipy</strong> for?</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
+  <li><a href="#github-integration" id="toc-github-integration" class="nav-link" data-scroll-target="#github-integration">GitHub integration</a></li>
+  <li><a href="#options" id="toc-options" class="nav-link" data-scroll-target="#options">Options</a>
+  <ul class="collapse">
+  <li><a href="#configuration" id="toc-configuration" class="nav-link" data-scroll-target="#configuration">Configuration</a></li>
+  <li><a href="#command-line-output-options" id="toc-command-line-output-options" class="nav-link" data-scroll-target="#command-line-output-options">Command line output options</a></li>
+  </ul></li>
+  <li><a href="#example-use-on-this-repo" id="toc-example-use-on-this-repo" class="nav-link" data-scroll-target="#example-use-on-this-repo">Example Use on This Repo</a></li>
+  <li><a href="#checks" id="toc-checks" class="nav-link" data-scroll-target="#checks">Checks</a></li>
   <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
   <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
   <li><a href="#issues" id="toc-issues" class="nav-link" data-scroll-target="#issues">Issues</a></li>
@@ -191,144 +190,188 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p>⚠️ Under development; use not currently recommended</p>
 </blockquote>
-<p>A Python Package for Static Code Quality Assessment. Use it to analyse your repos and assess their quality.</p>
-<p><img src="logo.svg" class="img-fluid" style="width:10.0%"></p>
+<p>A Package for the Static Code Quality Assessment of Python codebases. It scans local codebases or remote GitHub repositories and generates a report summarising various code quality metrics.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="logo.svg" class="img-fluid figure-img" style="width:10.0%"></p>
+<figcaption>SVG logo of panoptipy</figcaption>
+</figure>
+</div>
 <p><a href="https://pypi.org/project/panoptipy/"><img src="https://img.shields.io/pypi/v/panoptipy.svg" class="img-fluid" alt="PyPI"></a> <a href="https://pypi.org/project/panoptipy/"><img src="https://img.shields.io/pypi/status/panoptipy.svg" class="img-fluid" alt="Status"></a> <a href="https://pypi.org/project/panoptipy"><img src="https://img.shields.io/pypi/pyversions/panoptipy.png" class="img-fluid" alt="Python Version"></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/pypi/l/panoptipy.png" class="img-fluid" alt="License"></a> <a href="https://aeturrell.github.io/panoptipy/"><img src="https://img.shields.io/badge/Go%20to%20the%20docs-purple?style=flat.png" class="img-fluid" alt="Read the documentation at https://aeturrell.github.io/panoptipy/"></a> <a href="https://github.com/aeturrell/panoptipy/actions?workflow=Tests"><img src="https://github.com/aeturrell/panoptipy/workflows/Tests/badge.svg" class="img-fluid" alt="Tests"></a> <a href="https://codecov.io/gh/aeturrell/panoptipy"><img src="https://codecov.io/gh/aeturrell/panoptipy/branch/main/graph/badge.svg" class="img-fluid" alt="Codecov"></a> <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white.png" class="img-fluid" alt="pre-commit"></a> <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" class="img-fluid" alt="Ruff"></a> <a href="https://pepy.tech/projects/panoptipy"><img src="https://static.pepy.tech/badge/panoptipy.png" class="img-fluid" alt="Downloads"></a> <a href="https://github.com/aeturrell/panoptipy"><img src="https://img.shields.io/badge/source%20code-github-lightgrey?style=for-the-badge.png" class="img-fluid" alt="Source"></a></p>
 <p><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&amp;logo=linux&amp;logoColor=black.png" class="img-fluid" alt="Linux"> <img src="https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&amp;logo=macos&amp;logoColor=F0F0F0.png" class="img-fluid" alt="macOS"> <img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&amp;logo=windows&amp;logoColor=white.png" class="img-fluid" alt="Windows"></p>
 <section id="quickstart" class="level2">
 <h2 class="anchored" data-anchor-id="quickstart">Quickstart</h2>
-<p>The main way to use <strong>panoptipy</strong> is through its command-line interface. Here’s how to scan a Python git repository that is in the “project” directory:</p>
+<p>The main way to use <strong>panoptipy</strong> is through its command-line interface. Here’s how to scan a Python codebase that is in the “project” directory:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic scan with default settings</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan /path/to/project</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan with custom configuration file</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan /path/to/project <span class="at">--config</span> path/to/config.toml</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan with different output format</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan /path/to/project <span class="at">--format</span> json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The default output format is console, but you can also specify “parquet”, for which you will also need to specify an output path with <code>--output</code>.</p>
-<p>The scan command will:</p>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan /path/to/project</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To run on multiple directories, you can specify them as a space-separated list:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan multiple directories</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan /path/to/project1 /path/to/project2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can also use wildcards to specify directories:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all directories in the current directory</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> panoptipy scan ./<span class="pp">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Using the <code>scan</code> command in this way will:</p>
 <ul>
-<li>Load all configured checks</li>
+<li>Load <em>all</em> configured checks (there’s a list below)</li>
 <li>Analyse your codebase</li>
 <li>Generate a report with the results</li>
+<li>Output the report to the console (by default)</li>
 </ul>
-<p>If you wish to configure <em>panoptipy</em> to your needs, you can do so by either creating a specific configuration file with the <code>--config</code> option or by adding the following to your <code>pyproject.toml</code> file:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy]</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">checks</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">enabled</span><span class="op"> =</span> <span class="op">[</span><span class="st">"large_files"</span><span class="op">], </span><span class="dt">disabled</span><span class="op"> =</span> <span class="op">[], </span><span class="dt">critical</span><span class="op"> =</span> <span class="op">[</span><span class="st">"ruff_linting"</span><span class="op">] }</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy.thresholds]</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="dt">max_file_size</span> <span class="op">=</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that if you specify no check IDs, no checks at all will be run.</p>
-<p>What does a “critical” check mean? The CLI will: - Exit with code 1 if any critical checks failed - Exit with code 0 if no critical checks failed</p>
-<p>The scan will produce a report that shows:</p>
+<p>The scan report shows:</p>
 <ul>
 <li>Overall codebase rating (Gold, Silver, Bronze, or Problematic)</li>
 <li>A summary of whether each individual check passed or not</li>
 <li>Detailed information about any failures</li>
 </ul>
 </section>
-<section id="multiple-repositories" class="level2">
-<h2 class="anchored" data-anchor-id="multiple-repositories">Multiple Repositories</h2>
-<p>To use on multiple repositories, simply pass multiple paths. This will scan all repositories in the specified directory.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/repo1 /path/to/repo2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You can also use wildcards to scan multiple repositories at once. For example, to scan all repositories beginning with “py” in the current directory, you can use:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan ./py<span class="pp">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="what-is-panoptipy-for" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-panoptipy-for">What is <strong>panoptipy</strong> for?</h2>
+<p>There is a lot of overlap between <strong>panoptipy</strong> and <strong>pre-commit</strong> (with the relevant hooks). So what are the differences?</p>
+<ul>
+<li><strong>pre-commit</strong> is meant to be used by developers to check their own code before they commit it or in Continuous Integration (CI) / Continous Deployment (CD) pipelines.</li>
+<li><strong>panoptipy</strong> has features that help the leaders and managers of other developers. To that end it can summarise the results of many code repos at once, eg:
+<ul>
+<li>all those written by a (GitHub) team</li>
+<li>all those by a specific (GitHub) user</li>
+</ul></li>
+<li><strong>panoptipy</strong> can be be used to generate and export reports in a variety of formats (JSON, parquet) for further analysis.</li>
+</ul>
+<p>These packages are similar in that they can both be used in CI/CD pipelines but <strong>pre-commit</strong> should be your first port of call for that and is not only more geared to that use, but also <em>far</em> more mature.</p>
 </section>
-<section id="github-integration-examples" class="level2">
-<h2 class="anchored" data-anchor-id="github-integration-examples">GitHub Integration examples</h2>
-<p>You can use <em>panoptipy</em> to scan GitHub repositories. Note that, even for public repositories, you will need to authenticate with a GitHub token.</p>
-<section id="scan-all-public-repos-of-a-user" class="level3">
-<h3 class="anchored" data-anchor-id="scan-all-public-repos-of-a-user">Scan all public repos of a user</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user username <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<p>You can use <strong>panoptipy</strong> as a stand-alone tool via <a href="https://docs.astral.sh/uv/">Astral’s uv</a> package:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uvx</span> panoptipy scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Alternatively, you can install it as a Python package with <code>pip install</code> or <code>uv add</code>.</p>
+<p>To install the development version from git, use:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install git+https://github.com/aeturrell/panoptipy.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="scan-all-repositories-of-a-team-within-an-organisation" class="level3">
-<h3 class="anchored" data-anchor-id="scan-all-repositories-of-a-team-within-an-organisation">Scan all repositories of a team within an organisation</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-team organisation-name team-name <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="documentation" class="level2">
+<h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
+<p>You can find the full documentation for <strong>panoptipy</strong> at <a href="https://aeturrell.github.io/panoptipy/">https://aeturrell.github.io/panoptipy/</a>.</p>
 </section>
-<section id="scan-with-output-format-options" class="level3">
-<h3 class="anchored" data-anchor-id="scan-with-output-format-options">Scan with output format options</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user username <span class="at">--format</span> json <span class="at">--output</span> report.json <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="github-integration" class="level2">
+<h2 class="anchored" data-anchor-id="github-integration">GitHub integration</h2>
+<p><strong>panoptipy</strong> can be used to scan multiple GitHub repositories. This is useful for people or organisations that want to assess the quality of their codebases.</p>
+<p>Note that, even for scanning public repos, you will need a GitHub token. You can find out more about authenticating with the GitHub GraphQL API <a href="https://docs.github.com/en/graphql/guides/forming-calls-with-graphql">here</a>.</p>
+<p>The two commands that run against multiple GitHub repositories are <code>scan-user</code> and <code>scan-team</code>.</p>
+<p>Here’s how to use them:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub user</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user USERNAME <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub team</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-team ORGANISATION_NAME TEAM_NAME <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can also limit the repositories that are scanned by using the <code>--max-repos</code> option. This is useful if you want to test the tool on a small number of repositories before running it on all of them.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub user but limit to only retrieving the fist 5 repos</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user USERNAME <span class="at">--max-repos</span> 5 <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="scan-with-custom-configuration" class="level3">
-<h3 class="anchored" data-anchor-id="scan-with-custom-configuration">Scan with custom configuration</h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user username <span class="at">--config</span> path/to/config.toml <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="options" class="level2">
+<h2 class="anchored" data-anchor-id="options">Options</h2>
+<section id="configuration" class="level3">
+<h3 class="anchored" data-anchor-id="configuration">Configuration</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan with custom configuration file</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--config</span> path/to/config.toml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you wish to configure <em>panoptipy</em> to your needs, you can do so by passing a TOML file with the <code>--config</code> option. Here’s an example of a configuration file in TOML:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy]</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">checks</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">enabled</span><span class="op"> =</span> <span class="op">[</span><span class="st">"large_files"</span><span class="op">,</span> <span class="st">"ruff_linting"</span><span class="op">], </span><span class="dt">disabled</span><span class="op"> =</span> <span class="op">[], </span><span class="dt">critical</span><span class="op"> =</span> <span class="op">[</span><span class="st">"ruff_linting"</span><span class="op">] }</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy.thresholds]</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">max_file_size</span> <span class="op">=</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that <em>critical checks</em> are ones that cause CI/CD pipelines to fail. The CLI will:</p>
+<ul>
+<li>Exit with code 1 if any critical checks failed</li>
+<li>Exit with code 0 if no critical checks failed</li>
+</ul>
 </section>
-<section id="limit-results" class="level3">
-<h3 class="anchored" data-anchor-id="limit-results">Limit results</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user username <span class="at">--max-repos</span> 5 <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="command-line-output-options" class="level3">
+<h3 class="anchored" data-anchor-id="command-line-output-options">Command line output options</h3>
+<p>Although the default output is to the console, you can also specify some other options. The currently supported output formats are:</p>
+<div id="cell-7" class="cell" data-execution_count="1">
+<div class="cell-output cell-output-stdout">
+<pre><code>['console', 'json', 'parquet']</code></pre>
+</div>
+</div>
+<p>For example, to use the <code>json</code> format, you can run:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Or for <code>parquet</code>, you can run:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> parquet <span class="at">--output</span> /path/to/output.parquet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that while the <code>--output</code> argument is optional for <code>json</code>, it is required for <code>parquet</code>.</p>
 </section>
 </section>
 <section id="example-use-on-this-repo" class="level2">
-<h2 class="anchored" data-anchor-id="example-use-on-this-repo">Example Use on This Repo!</h2>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="cell-6" class="cell" data-execution_count="1">
+<h2 class="anchored" data-anchor-id="example-use-on-this-repo">Example Use on This Repo</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-10" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Repository: ..
 
 
 ╭────────────────────────────── Panoptipy Report ──────────────────────────────╮
-│ Codebase Rating: SILVER                                                      │
+│ Codebase Rating: BRONZE                                                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 Summary:
 Total checks: 8
-Fail: 2
-Pass: 6
-Pass rate: 75.0%
+Fail: 3
+Pass: 5
+Pass rate: 62.5%
                                                                                 
                               Check Results for ..                              
-┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃  Status  ┃ Check ID                ┃ Message                                 ┃
-┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ ❌       │ docstrings              │ Found 31 public items without           │
-│          │                         │ docstrings                              │
-│ ❌       │ private_key             │ Found 1 files containing private keys   │
-│ ✅       │ ruff_linting            │ No linting issues found                 │
-│ ✅       │ ruff_format             │ All files are properly formatted        │
-│ ✅       │ large_files             │ No version-controlled files exceed size │
-│          │                         │ threshold (500KB)                       │
-│ ✅       │ notebook_output         │ All notebooks are properly stripped of  │
-│          │                         │ outputs and excess metadata             │
-│ ✅       │ pydoclint               │ All docstrings match type signatures in │
-│          │                         │ 15 files                                │
-│ ✅       │ pyproject_toml_validate │ pyproject.toml validated successfully   │
-│          │                         │ by validate-pyproject API.              │
-└──────────┴─────────────────────────┴─────────────────────────────────────────┘
+╭──────────┬─────────────────┬─────────────────────────────────────────────────╮
+│  Status  │ Check ID        │ Message                                         │
+├──────────┼─────────────────┼─────────────────────────────────────────────────┤
+│ ❌       │ docstrings      │ Found 31 public items without docstrings        │
+│ ❌       │ ruff_format     │ Found 0 files with formatting issues            │
+│ ❌       │ private_key     │ Found 1 files containing private keys           │
+│ ✅       │ ruff_linting    │ No linting issues found                         │
+│ ✅       │ large_files     │ No version-controlled files exceed size         │
+│          │                 │ threshold (500KB)                               │
+│ ✅       │ notebook_output │ All notebooks are stripped of outputs and       │
+│          │                 │ excess metadata                                 │
+│ ✅       │ pydoclint       │ All docstrings match type signatures in 16      │
+│          │                 │ files                                           │
+│ ✅       │ pyproject_toml… │ pyproject.toml validated successfully by        │
+│          │                 │ validate-pyproject API.                         │
+╰──────────┴─────────────────┴─────────────────────────────────────────────────╯
 
 Details:
 ╭───────────────────────────────── docstrings ─────────────────────────────────╮
 │ missing_docstrings:                                                          │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:get_tr │
-│ acked_files                                                                  │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ get_tracked_files                                                            │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:safe_c │
-│ heck_run                                                                     │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ safe_check_run                                                               │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:parse_ │
-│ tool_output                                                                  │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ parse_tool_output                                                            │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:succes │
-│ s_result                                                                     │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ success_result                                                               │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:fail_r │
-│ esult                                                                        │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ fail_result                                                                  │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:Notebo │
-│ okOutputCheck                                                                │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ NotebookOutputCheck                                                          │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:catego │
-│ ry                                                                           │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ category                                                                     │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:run    │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ run                                                                          │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:catego │
-│ ry                                                                           │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ category                                                                     │
 │   •                                                                          │
-│ /home/runner/work/panoptipy/panoptipy/docs/../src/panoptipy/checks.py:run    │
+│ /Users/aet/Documents/git_projects/panoptipy/docs/../src/panoptipy/checks.py: │
+│ run                                                                          │
 │   ... and 21 more                                                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────── ruff_format ─────────────────────────────────╮
+│ issues:                                                                      │
+│ issue_count: 0                                                               │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭──────────────────────────────── private_key ─────────────────────────────────╮
 │ files_with_private_keys:                                                     │
@@ -339,56 +382,57 @@ Details:
 </div>
 </div>
 </section>
-<section id="available-checks" class="level2">
-<h2 class="anchored" data-anchor-id="available-checks">Available Checks</h2>
-<div id="cell-8" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display" data-execution_count="2">
-<div id="yyhzvwfmba" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<section id="checks" class="level2">
+<h2 class="anchored" data-anchor-id="checks">Checks</h2>
+<p>There are several different available checks that can be run. These are:</p>
+<div id="cell-12" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div id="wnpfnacvqx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#yyhzvwfmba table {
+#wnpfnacvqx table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#yyhzvwfmba thead, tbody, tfoot, tr, td, th { border-style: none; }
+#wnpfnacvqx thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#yyhzvwfmba p { margin: 0; padding: 0; }
- #yyhzvwfmba .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #yyhzvwfmba .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #yyhzvwfmba .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #yyhzvwfmba .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #yyhzvwfmba .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yyhzvwfmba .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #yyhzvwfmba .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yyhzvwfmba .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #yyhzvwfmba .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #yyhzvwfmba .gt_column_spanner_outer:first-child { padding-left: 0; }
- #yyhzvwfmba .gt_column_spanner_outer:last-child { padding-right: 0; }
- #yyhzvwfmba .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #yyhzvwfmba .gt_spanner_row { border-bottom-style: hidden; }
- #yyhzvwfmba .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #yyhzvwfmba .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
- #yyhzvwfmba .gt_from_md> :first-child { margin-top: 0; }
- #yyhzvwfmba .gt_from_md> :last-child { margin-bottom: 0; }
- #yyhzvwfmba .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
- #yyhzvwfmba .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
- #yyhzvwfmba .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #yyhzvwfmba .gt_row_group_first td { border-top-width: 2px; }
- #yyhzvwfmba .gt_row_group_first th { border-top-width: 2px; }
- #yyhzvwfmba .gt_striped { background-color: rgba(128,128,128,0.05); }
- #yyhzvwfmba .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #yyhzvwfmba .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #yyhzvwfmba .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #yyhzvwfmba .gt_left { text-align: left; }
- #yyhzvwfmba .gt_center { text-align: center; }
- #yyhzvwfmba .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #yyhzvwfmba .gt_font_normal { font-weight: normal; }
- #yyhzvwfmba .gt_font_bold { font-weight: bold; }
- #yyhzvwfmba .gt_font_italic { font-style: italic; }
- #yyhzvwfmba .gt_super { font-size: 65%; }
- #yyhzvwfmba .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #yyhzvwfmba .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#wnpfnacvqx p { margin: 0; padding: 0; }
+ #wnpfnacvqx .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #wnpfnacvqx .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #wnpfnacvqx .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #wnpfnacvqx .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #wnpfnacvqx .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #wnpfnacvqx .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #wnpfnacvqx .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #wnpfnacvqx .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #wnpfnacvqx .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #wnpfnacvqx .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #wnpfnacvqx .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #wnpfnacvqx .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #wnpfnacvqx .gt_spanner_row { border-bottom-style: hidden; }
+ #wnpfnacvqx .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #wnpfnacvqx .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #wnpfnacvqx .gt_from_md> :first-child { margin-top: 0; }
+ #wnpfnacvqx .gt_from_md> :last-child { margin-bottom: 0; }
+ #wnpfnacvqx .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #wnpfnacvqx .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #wnpfnacvqx .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #wnpfnacvqx .gt_row_group_first td { border-top-width: 2px; }
+ #wnpfnacvqx .gt_row_group_first th { border-top-width: 2px; }
+ #wnpfnacvqx .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #wnpfnacvqx .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #wnpfnacvqx .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #wnpfnacvqx .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #wnpfnacvqx .gt_left { text-align: left; }
+ #wnpfnacvqx .gt_center { text-align: center; }
+ #wnpfnacvqx .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #wnpfnacvqx .gt_font_normal { font-weight: normal; }
+ #wnpfnacvqx .gt_font_bold { font-weight: bold; }
+ #wnpfnacvqx .gt_font_italic { font-style: italic; }
+ #wnpfnacvqx .gt_super { font-size: 65%; }
+ #wnpfnacvqx .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #wnpfnacvqx .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 
@@ -440,14 +484,7 @@ Details:
         
 </div>
 </div>
-</section>
-<section id="installation" class="level2">
-<h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>You can use <strong>panoptipy</strong> as a stand-alone tool using <a href="https://docs.astral.sh/uv/">Astral’s uv</a> package:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uvx</span> panoptipy scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Alternatively, you can install it as a Python package with <code>pip install</code> or <code>uv add</code>.</p>
-<p>To install the development version from git, use:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install git+https://github.com/aeturrell/panoptipy.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can find more information about each check in the <a href="https://aeturrell.github.io/panoptipy/reference">reference documentation</a>.</p>
 </section>
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>

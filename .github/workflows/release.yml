@@ -63,12 +63,6 @@ jobs:
         if: steps.check-version.outputs.tag
         uses: pypa/gh-action-pypi-publish@release/v1
 
-      - name: Publish package on TestPyPI
-        if: "! steps.check-version.outputs.tag"
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
       - name: Publish the release notes
         uses: release-drafter/release-drafter@v6.1.0
         with:

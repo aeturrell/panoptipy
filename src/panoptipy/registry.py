@@ -5,12 +5,13 @@ import pluggy
 from .checks import (
     Check,
     DocstringCheck,
-    HasTestsCheck,  # Replace PytestCheck with HasTestsCheck
+    HasTestsCheck,
     LargeFilesCheck,
     NotebookOutputCheck,
     PrivateKeyCheck,
     PydoclintCheck,
     PyprojectTomlValidateCheck,
+    ReadmeCheck,
     RuffFormatCheck,
     RuffLintingCheck,
 )
@@ -54,9 +55,11 @@ class CheckRegistry:
         self.register(DocstringCheck())
         self.register(RuffLintingCheck())
         self.register(RuffFormatCheck())
-        self.register(LargeFilesCheck(config=self.config))  # Pass config here
+        self.register(LargeFilesCheck(config=self.config))
         self.register(PrivateKeyCheck())
         self.register(NotebookOutputCheck())
         self.register(PydoclintCheck())
         self.register(PyprojectTomlValidateCheck())
         self.register(HasTestsCheck())
+        self.register(ReadmeCheck(config=self.config))
+        # Add extra checks here

@@ -163,6 +163,8 @@ class DocstringCheck(Check):
         missing_docstrings = []
         for module in codebase.get_python_modules():
             module_path = str(module.path)
+            root_dir = codebase.root_path
+            relative_path = os.path.relpath(module.path, root_dir)
             for item in module.get_public_items():
                 item_name = item.get("name") if isinstance(item, dict) else item.name
                 if not self._is_public(item_name) or self._is_test(
@@ -173,7 +175,7 @@ class DocstringCheck(Check):
                     item.get("docstring") if isinstance(item, dict) else item.docstring
                 )
                 if not docstring:
-                    missing_docstrings.append(f"{module_path}:{item_name}")
+                    missing_docstrings.append(f"{str(relative_path)}:{item_name}")
 
         if missing_docstrings:
             return fail_result(
@@ -965,6 +967,138 @@ class HasTestsCheck(Check):
                     "test_items": [],
                 },
             )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
+class ReadmeCheck(Check):
+    """A check that verifies the existence and content of a README file.
+
+    This check searches for README files in common formats (md, rst, txt) in the
+    repository root and verifies that they contain sufficient content. A README
+    is considered "empty" if it contains fewer than a configurable number of
+    non-whitespace characters.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "readme"
+        description (str): Description of what this check does
+        min_content_length (int): Minimum content length (in characters) for a README
+            to be considered non-empty
+    """
+
+    def __init__(self, config: Optional[Config] = None):
+        super().__init__(
+            check_id="readme",
+            description="Checks for the existence and content of a README file",
+        )
+        self.config = config
+        # Get minimum content length from config, default to 100 characters
+        self.min_content_length = (
+            config.get("thresholds.min_readme_length", 100) if config else 100
+        )
+        # Common README extensions
+        self.readme_patterns = ["README.md", "README.rst", "README.txt", "README"]
+
+    @property
+    def category(self) -> str:
+        return "documentation"
+
+    def _find_readme_files(self, root_dir: Path) -> List[Path]:
+        """Find README files in the repository root.
+
+        Args:
+            root_dir: Repository root directory
+
+        Returns:
+            List of paths to README files
+        """
+        readme_files = []
+        for pattern in self.readme_patterns:
+            readme_path = root_dir / pattern
+            if readme_path.exists() and readme_path.is_file():
+                readme_files.append(readme_path)
+        return readme_files
+
+    def _check_readme_content(self, readme_path: Path) -> Dict[str, Any]:
+        """Check if a README file has meaningful content.
+
+        Args:
+            readme_path: Path to the README file
+
+        Returns:
+            Dictionary with content length information
+        """
+        try:
+            with open(readme_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Remove whitespace to get actual content length
+            non_whitespace_content = "".join(content.split())
+            content_length = len(non_whitespace_content)
+
+            return {
+                "file": str(readme_path),
+                "content_length": content_length,
+                "has_content": content_length >= self.min_content_length,
+                "min_required": self.min_content_length,
+            }
+        except Exception as e:
+            return {
+                "file": str(readme_path),
+                "error": str(e),
+                "has_content": False,
+                "min_required": self.min_content_length,
+            }
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = codebase.root_path
+
+        # Find all README files in repository root
+        readme_files = self._find_readme_files(root_dir)
+
+        if not readme_files:
+            return fail_result(
+                check_id=self.check_id,
+                message="No README file found in repository root",
+                details={
+                    "readme_found": False,
+                    "patterns_checked": self.readme_patterns,
+                },
+            )
+
+        # Check content of all README files
+        readme_details = []
+        has_content = False
+
+        for readme_path in readme_files:
+            content_info = self._check_readme_content(readme_path)
+            readme_details.append(content_info)
+            if content_info.get("has_content", False):
+                has_content = True
+
+        if not has_content:
+            return fail_result(
+                check_id=self.check_id,
+                message=f"README exists but contains insufficient content (min: {self.min_content_length} chars)",
+                details={
+                    "readme_found": True,
+                    "has_content": False,
+                    "readme_files": readme_details,
+                    "min_content_length": self.min_content_length,
+                },
+            )
+
+        return success_result(
+            check_id=self.check_id,
+            message="README exists with sufficient content",
+            details={
+                "readme_found": True,
+                "has_content": True,
+                "readme_files": readme_details,
+                "min_content_length": self.min_content_length,
+            },
+        )
 
     def run(self, codebase: "Codebase") -> CheckResult:
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)

@@ -215,7 +215,7 @@ class ConsoleReporter(BaseReporter):
 
         # Add columns with more explicit width control
         table.add_column(
-            "Status", justify="center", style="dim", width=8
+            "Status", justify="center", width=8
         )  # Keep fixed width for status symbol
         table.add_column(
             "Check ID", style="cyan", min_width=15, ratio=1

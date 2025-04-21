@@ -1,7 +1,9 @@
 """Base classes for implementing checks in panoptipy."""
 
 import ast
+import logging
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
@@ -276,7 +278,6 @@ class RuffFormatCheck(Check):
 
     def _extract_files_with_issues(self, output: str) -> List[Dict[str, Any]]:
         """Extract files that would be reformatted from the output."""
-        import re
 
         issues = []
 
@@ -777,105 +778,192 @@ class PyprojectTomlValidateCheck(Check):
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
 
 
-class PytestCheck(Check):
-    """A check that verifies whether pytest tests are present in the codebase.
+class HasTestsCheck(Check):
+    """A check that identifies test files and test functions without executing code.
 
-    This check runs pytest with the --collect-only flag to determine if the codebase
-    contains test files that can be discovered by pytest. It provides information
-    about the number of tests found and can help ensure that projects have proper
-    test coverage.
+    This check searches for test files following standard Python testing conventions
+    (test_*.py or *_test.py) and identifies test functions using AST parsing. It counts
+    and reports test functions that follow these patterns:
+
+    * Functions prefixed with 'test_'
+    * Methods prefixed with 'test_' inside classes prefixed with 'Test'
+    * Static and class methods prefixed with 'test_' inside test classes
+
+    The check provides a count of all identified test items without executing any code.
 
     Attributes:
-        check_id (str): Identifier for this check, set to "pytest_tests"
+        check_id (str): Identifier for this check, set to "has_tests"
         description (str): Description of what this check does
     """
 
     def __init__(self):
         super().__init__(
-            check_id="pytest_tests",
-            description="Checks if pytest tests are present in the codebase",
+            check_id="has_tests",
+            description="Checks if tests are present in the codebase using AST parsing",
         )
 
     @property
     def category(self) -> str:
         return "testing"
 
-    def _parse_pytest_output(self, output: str) -> Dict[str, Any]:
-        """Parse the output from pytest --collect-only.
+    def _find_test_files(self, root_dir: Path) -> List[Path]:
+        """Find all test files recursively in the given directory.
 
         Args:
-            output: Output string from pytest command
+            root_dir: Root directory to search in
 
         Returns:
-            Dictionary with parsed information
+            List of paths to test files
         """
-        test_count = 0
         test_files = []
-        test_functions = []
 
-        # Look for the "collected X items" line
-        import re
+        for path in root_dir.glob("**/*.py"):
+            # Skip hidden directories and files, but allow parent directory references
+            if any(
+                part.startswith(".") and part not in [".", ".."] for part in path.parts
+            ):
+                continue
 
-        count_match = re.search(r"\ncollected (\d+) items\n", output)
-        if count_match:
-            test_count = int(count_match.group(1))
+            # Check if file matches test patterns
+            if path.name.startswith("test_") or path.stem.endswith("_test"):
+                test_files.append(path)
 
-        # Extract test file paths and test functions
-        for line in output.splitlines():
-            # Match test modules
-            if "<Module " in line:
-                module_match = re.search(r"<Module ([^>]+)>", line)
-                if module_match:
-                    test_files.append(module_match.group(1).strip())
+        return test_files
 
-            # Match test functions
-            if "<Function " in line:
-                func_match = re.search(r"<Function ([^>]+)>", line)
-                if func_match:
-                    test_functions.append(func_match.group(1).strip())
+    def _is_test_class(self, class_node: ast.ClassDef) -> bool:
+        """Check if a class is a test class (starts with 'Test' and has no __init__).
 
-        return {
-            "test_count": test_count,
-            "test_files": test_files,
-            "test_functions": test_functions,
-        }
+        Args:
+            class_node: AST ClassDef node
+
+        Returns:
+            True if this is a test class, False otherwise
+        """
+        if not class_node.name.startswith("Test"):
+            return False
+
+        # Check if it has an __init__ method
+        for node in class_node.body:
+            if isinstance(node, ast.FunctionDef) and node.name == "__init__":
+                return False
+
+        return True
+
+    def _extract_test_items(self, file_path: Path) -> List[Dict[str, Any]]:
+        """Extract test items from a Python file using AST parsing.
+
+        Args:
+            file_path: Path to the Python file
+
+        Returns:
+            List of dictionaries with test item information
+        """
+        test_items = []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            tree = ast.parse(content)
+
+            # Track current class for context
+            current_class = None
+
+            for node in ast.walk(tree):
+                # Handle class definitions
+                if isinstance(node, ast.ClassDef):
+                    current_class = node if self._is_test_class(node) else None
+
+                # Handle function definitions
+                elif isinstance(node, ast.FunctionDef):
+                    is_test_function = False
+                    decorator_list = [
+                        d.id for d in node.decorator_list if isinstance(d, ast.Name)
+                    ]
+
+                    # Test function outside class
+                    if node.name.startswith("test_") and current_class is None:
+                        is_test_function = True
+                        item_type = "function"
+                        class_name = None
+
+                    # Test method inside test class
+                    elif (
+                        node.name.startswith("test_")
+                        and current_class is not None
+                        and node.name != "__init__"
+                    ):
+                        is_test_function = True
+                        item_type = "method"
+                        class_name = current_class.name
+
+                        # Check for staticmethod or classmethod
+                        if "staticmethod" in decorator_list:
+                            item_type = "staticmethod"
+                        elif "classmethod" in decorator_list:
+                            item_type = "classmethod"
+
+                    if is_test_function:
+                        test_items.append(
+                            {
+                                "name": node.name,
+                                "type": item_type,
+                                "class": class_name,
+                                "file": str(file_path),
+                                "line": node.lineno,
+                            }
+                        )
+
+        except Exception as e:
+            # Log error but continue with other files
+            logging.warning(f"Error parsing file {file_path}: {e}")
+
+        return test_items
 
     def _run_logic(self, codebase: "Codebase") -> CheckResult:
         root_dir = codebase.root_path
 
-        try:
-            # Run pytest with --collect-only
-            result = subprocess.run(
-                ["pytest", "--collect-only"],
-                cwd=root_dir,
-                capture_output=True,
-                text=True,
-                check=False,
+        # Find all test files
+        test_files = self._find_test_files(root_dir)
+
+        if not test_files:
+            return fail_result(
+                check_id=self.check_id,
+                message="No test files found in the codebase",
+                details={"test_count": 0, "test_files": [], "test_items": []},
             )
 
-            # Parse the output to get test information
-            parsed_info = self._parse_pytest_output(result.stdout)
-            test_count = parsed_info["test_count"]
+        # Extract test items from all files
+        all_test_items = []
+        test_file_paths = []
 
-            if test_count > 0:
-                return success_result(
-                    check_id=self.check_id,
-                    message=f"Found {test_count} tests in the codebase",
-                    details=parsed_info,
-                )
-            else:
-                return fail_result(
-                    check_id=self.check_id,
-                    message="No tests found in the codebase",
-                    details=parsed_info,
-                )
+        for file_path in test_files:
+            test_items = self._extract_test_items(file_path)
+            if test_items:
+                test_file_paths.append(str(file_path.relative_to(root_dir)))
+                all_test_items.extend(test_items)
 
-        except (FileNotFoundError, subprocess.SubprocessError) as e:
-            return CheckResult(
+        test_count = len(all_test_items)
+
+        if test_count > 0:
+            return success_result(
                 check_id=self.check_id,
-                status=CheckStatus.ERROR,
-                message=f"Error running pytest: {e}",
-                details={"error": str(e)},
+                message=f"Found {test_count} tests in the codebase",
+                details={
+                    "test_count": test_count,
+                    "test_files": test_file_paths,
+                    "test_items": all_test_items,
+                },
+            )
+        else:
+            return fail_result(
+                check_id=self.check_id,
+                message="No tests found in the codebase",
+                details={
+                    "test_count": 0,
+                    "test_files": test_file_paths,
+                    "test_items": [],
+                },
             )
 
     def run(self, codebase: "Codebase") -> CheckResult:

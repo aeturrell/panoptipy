@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
@@ -157,9 +158,12 @@ def test_valid_readme(mock_is_file, mock_exists, readme_check, mock_codebase):
     mock_exists.return_value = True
     mock_is_file.return_value = True
 
+    # Use os.path.join for platform-independent path handling
+    readme_path = os.path.join(str(mock_codebase.root_path), "README.md")
+
     # Setup different content for different README files
     readme_contents = {
-        "/fake/repo/README.md": "This is a README with plenty of content that will definitely pass the check because it is much longer than the minimum threshold of 50 characters.",
+        readme_path: "This is a README with plenty of content that will definitely pass the check because it is much longer than the minimum threshold of 50 characters.",
     }
 
     def mock_open_side_effect(file, *args, **kwargs):

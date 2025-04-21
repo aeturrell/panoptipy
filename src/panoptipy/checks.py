@@ -775,3 +775,108 @@ class PyprojectTomlValidateCheck(Check):
 
     def run(self, codebase: "Codebase") -> CheckResult:
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
+class PytestCheck(Check):
+    """A check that verifies whether pytest tests are present in the codebase.
+
+    This check runs pytest with the --collect-only flag to determine if the codebase
+    contains test files that can be discovered by pytest. It provides information
+    about the number of tests found and can help ensure that projects have proper
+    test coverage.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "pytest_tests"
+        description (str): Description of what this check does
+    """
+
+    def __init__(self):
+        super().__init__(
+            check_id="pytest_tests",
+            description="Checks if pytest tests are present in the codebase",
+        )
+
+    @property
+    def category(self) -> str:
+        return "testing"
+
+    def _parse_pytest_output(self, output: str) -> Dict[str, Any]:
+        """Parse the output from pytest --collect-only.
+
+        Args:
+            output: Output string from pytest command
+
+        Returns:
+            Dictionary with parsed information
+        """
+        test_count = 0
+        test_files = []
+        test_functions = []
+
+        # Look for the "collected X items" line
+        import re
+
+        count_match = re.search(r"collected (\d+) items", output)
+        if count_match:
+            test_count = int(count_match.group(1))
+
+        # Extract test file paths and test functions
+        for line in output.splitlines():
+            # Match test modules
+            if "<Module " in line:
+                module_match = re.search(r"<Module ([^>]+)>", line)
+                if module_match:
+                    test_files.append(module_match.group(1).strip())
+
+            # Match test functions
+            if "<Function " in line:
+                func_match = re.search(r"<Function ([^>]+)>", line)
+                if func_match:
+                    test_functions.append(func_match.group(1).strip())
+
+        return {
+            "test_count": test_count,
+            "test_files": test_files,
+            "test_functions": test_functions,
+        }
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = codebase.root_path
+
+        try:
+            # Run pytest with --collect-only
+            result = subprocess.run(
+                ["pytest", "--collect-only"],
+                cwd=root_dir,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            # Parse the output to get test information
+            parsed_info = self._parse_pytest_output(result.stdout)
+            test_count = parsed_info["test_count"]
+
+            if test_count > 0:
+                return success_result(
+                    check_id=self.check_id,
+                    message=f"Found {test_count} pytest tests in the codebase",
+                    details=parsed_info,
+                )
+            else:
+                return fail_result(
+                    check_id=self.check_id,
+                    message="No pytest tests found in the codebase",
+                    details=parsed_info,
+                )
+
+        except (FileNotFoundError, subprocess.SubprocessError) as e:
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.ERROR,
+                message=f"Error running pytest: {e}",
+                details={"error": str(e)},
+            )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)

@@ -3,7 +3,7 @@ project:
 
 website:
   title: "panoptipy"
-  favicon: favicon.ico
+  favicon: favicon.png
   twitter-card: true
   navbar:
     left:
@@ -12,6 +12,7 @@ website:
       - text: "Reference"
         file: reference/index.qmd
       - contributing.qmd
+
 
 format:
   html:

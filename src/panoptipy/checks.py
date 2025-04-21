@@ -1,7 +1,9 @@
 """Base classes for implementing checks in panoptipy."""
 
 import ast
+import logging
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
@@ -161,6 +163,8 @@ class DocstringCheck(Check):
         missing_docstrings = []
         for module in codebase.get_python_modules():
             module_path = str(module.path)
+            root_dir = codebase.root_path
+            relative_path = os.path.relpath(module.path, root_dir)
             for item in module.get_public_items():
                 item_name = item.get("name") if isinstance(item, dict) else item.name
                 if not self._is_public(item_name) or self._is_test(
@@ -171,7 +175,7 @@ class DocstringCheck(Check):
                     item.get("docstring") if isinstance(item, dict) else item.docstring
                 )
                 if not docstring:
-                    missing_docstrings.append(f"{module_path}:{item_name}")
+                    missing_docstrings.append(f"{str(relative_path)}:{item_name}")
 
         if missing_docstrings:
             return fail_result(
@@ -276,7 +280,6 @@ class RuffFormatCheck(Check):
 
     def _extract_files_with_issues(self, output: str) -> List[Dict[str, Any]]:
         """Extract files that would be reformatted from the output."""
-        import re
 
         issues = []
 
@@ -772,6 +775,330 @@ class PyprojectTomlValidateCheck(Check):
                 message=f"pyproject.toml validation failed: {ex.message}",
                 details={"error": str(ex), "context": ex.context},
             )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
+class HasTestsCheck(Check):
+    """A check that identifies test files and test functions without executing code.
+
+    This check searches for test files following standard Python testing conventions
+    (test_*.py or *_test.py) and identifies test functions using AST parsing. It counts
+    and reports test functions that follow these patterns:
+
+    * Functions prefixed with 'test_'
+    * Methods prefixed with 'test_' inside classes prefixed with 'Test'
+    * Static and class methods prefixed with 'test_' inside test classes
+
+    The check provides a count of all identified test items without executing any code.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "has_tests"
+        description (str): Description of what this check does
+    """
+
+    def __init__(self):
+        super().__init__(
+            check_id="has_tests",
+            description="Checks if tests are present in the codebase using AST parsing",
+        )
+
+    @property
+    def category(self) -> str:
+        return "testing"
+
+    def _find_test_files(self, root_dir: Path) -> List[Path]:
+        """Find all test files recursively in the given directory.
+
+        Args:
+            root_dir: Root directory to search in
+
+        Returns:
+            List of paths to test files
+        """
+        test_files = []
+
+        for path in root_dir.glob("**/*.py"):
+            # Skip hidden directories and files, but allow parent directory references
+            if any(
+                part.startswith(".") and part not in [".", ".."] for part in path.parts
+            ):
+                continue
+
+            # Check if file matches test patterns
+            if path.name.startswith("test_") or path.stem.endswith("_test"):
+                test_files.append(path)
+
+        return test_files
+
+    def _is_test_class(self, class_node: ast.ClassDef) -> bool:
+        """Check if a class is a test class (starts with 'Test' and has no __init__).
+
+        Args:
+            class_node: AST ClassDef node
+
+        Returns:
+            True if this is a test class, False otherwise
+        """
+        if not class_node.name.startswith("Test"):
+            return False
+
+        # Check if it has an __init__ method
+        for node in class_node.body:
+            if isinstance(node, ast.FunctionDef) and node.name == "__init__":
+                return False
+
+        return True
+
+    def _extract_test_items(self, file_path: Path) -> List[Dict[str, Any]]:
+        """Extract test items from a Python file using AST parsing.
+
+        Args:
+            file_path: Path to the Python file
+
+        Returns:
+            List of dictionaries with test item information
+        """
+        test_items = []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            tree = ast.parse(content)
+
+            # Track current class for context
+            current_class = None
+
+            for node in ast.walk(tree):
+                # Handle class definitions
+                if isinstance(node, ast.ClassDef):
+                    current_class = node if self._is_test_class(node) else None
+
+                # Handle function definitions
+                elif isinstance(node, ast.FunctionDef):
+                    is_test_function = False
+                    decorator_list = [
+                        d.id for d in node.decorator_list if isinstance(d, ast.Name)
+                    ]
+
+                    # Test function outside class
+                    if node.name.startswith("test_") and current_class is None:
+                        is_test_function = True
+                        item_type = "function"
+                        class_name = None
+
+                    # Test method inside test class
+                    elif (
+                        node.name.startswith("test_")
+                        and current_class is not None
+                        and node.name != "__init__"
+                    ):
+                        is_test_function = True
+                        item_type = "method"
+                        class_name = current_class.name
+
+                        # Check for staticmethod or classmethod
+                        if "staticmethod" in decorator_list:
+                            item_type = "staticmethod"
+                        elif "classmethod" in decorator_list:
+                            item_type = "classmethod"
+
+                    if is_test_function:
+                        test_items.append(
+                            {
+                                "name": node.name,
+                                "type": item_type,
+                                "class": class_name,
+                                "file": str(file_path),
+                                "line": node.lineno,
+                            }
+                        )
+
+        except Exception as e:
+            # Log error but continue with other files
+            logging.warning(f"Error parsing file {file_path}: {e}")
+
+        return test_items
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = codebase.root_path
+
+        # Find all test files
+        test_files = self._find_test_files(root_dir)
+
+        if not test_files:
+            return fail_result(
+                check_id=self.check_id,
+                message="No test files found in the codebase",
+                details={"test_count": 0, "test_files": [], "test_items": []},
+            )
+
+        # Extract test items from all files
+        all_test_items = []
+        test_file_paths = []
+
+        for file_path in test_files:
+            test_items = self._extract_test_items(file_path)
+            if test_items:
+                test_file_paths.append(str(file_path.relative_to(root_dir)))
+                all_test_items.extend(test_items)
+
+        test_count = len(all_test_items)
+
+        if test_count > 0:
+            return success_result(
+                check_id=self.check_id,
+                message=f"Found {test_count} tests in the codebase",
+                details={
+                    "test_count": test_count,
+                    "test_files": test_file_paths,
+                    "test_items": all_test_items,
+                },
+            )
+        else:
+            return fail_result(
+                check_id=self.check_id,
+                message="No tests found in the codebase",
+                details={
+                    "test_count": 0,
+                    "test_files": test_file_paths,
+                    "test_items": [],
+                },
+            )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
+class ReadmeCheck(Check):
+    """A check that verifies the existence and content of a README file.
+
+    This check searches for README files in common formats (md, rst, txt) in the
+    repository root and verifies that they contain sufficient content. A README
+    is considered "empty" if it contains fewer than a configurable number of
+    non-whitespace characters.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "readme"
+        description (str): Description of what this check does
+        min_content_length (int): Minimum content length (in characters) for a README
+            to be considered non-empty
+    """
+
+    def __init__(self, config: Optional[Config] = None):
+        super().__init__(
+            check_id="readme",
+            description="Checks for the existence and content of a README file",
+        )
+        self.config = config
+        # Get minimum content length from config, default to 100 characters
+        self.min_content_length = (
+            config.get("thresholds.min_readme_length", 100) if config else 100
+        )
+        # Common README extensions
+        self.readme_patterns = ["README.md", "README.rst", "README.txt", "README"]
+
+    @property
+    def category(self) -> str:
+        return "documentation"
+
+    def _find_readme_files(self, root_dir: Path) -> List[Path]:
+        """Find README files in the repository root.
+
+        Args:
+            root_dir: Repository root directory
+
+        Returns:
+            List of paths to README files
+        """
+        readme_files = []
+        for pattern in self.readme_patterns:
+            readme_path = root_dir / pattern
+            if readme_path.exists() and readme_path.is_file():
+                readme_files.append(readme_path)
+        return readme_files
+
+    def _check_readme_content(self, readme_path: Path) -> Dict[str, Any]:
+        """Check if a README file has meaningful content.
+
+        Args:
+            readme_path: Path to the README file
+
+        Returns:
+            Dictionary with content length information
+        """
+        try:
+            with open(readme_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Remove whitespace to get actual content length
+            non_whitespace_content = "".join(content.split())
+            content_length = len(non_whitespace_content)
+
+            return {
+                "file": str(readme_path),
+                "content_length": content_length,
+                "has_content": content_length >= self.min_content_length,
+                "min_required": self.min_content_length,
+            }
+        except Exception as e:
+            return {
+                "file": str(readme_path),
+                "error": str(e),
+                "has_content": False,
+                "min_required": self.min_content_length,
+            }
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = codebase.root_path
+
+        # Find all README files in repository root
+        readme_files = self._find_readme_files(root_dir)
+
+        if not readme_files:
+            return fail_result(
+                check_id=self.check_id,
+                message="No README file found in repository root",
+                details={
+                    "readme_found": False,
+                    "patterns_checked": self.readme_patterns,
+                },
+            )
+
+        # Check content of all README files
+        readme_details = []
+        has_content = False
+
+        for readme_path in readme_files:
+            content_info = self._check_readme_content(readme_path)
+            readme_details.append(content_info)
+            if content_info.get("has_content", False):
+                has_content = True
+
+        if not has_content:
+            return fail_result(
+                check_id=self.check_id,
+                message=f"README exists but contains insufficient content (min: {self.min_content_length} chars)",
+                details={
+                    "readme_found": True,
+                    "has_content": False,
+                    "readme_files": readme_details,
+                    "min_content_length": self.min_content_length,
+                },
+            )
+
+        return success_result(
+            check_id=self.check_id,
+            message="README exists with sufficient content",
+            details={
+                "readme_found": True,
+                "has_content": True,
+                "readme_files": readme_details,
+                "min_content_length": self.min_content_length,
+            },
+        )
 
     def run(self, codebase: "Codebase") -> CheckResult:
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)

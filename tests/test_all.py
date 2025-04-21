@@ -1,7 +1,13 @@
+import os
 import subprocess
+from pathlib import Path
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 import toml
+
+from panoptipy.checks import CheckStatus, ReadmeCheck
+from panoptipy.config import Config
 
 
 def run_command(command):
@@ -34,6 +40,7 @@ def config_file(tmp_path):
                 },
                 "thresholds": {
                     "max_file_size": 1000,
+                    "min_readme_length": 200,  # Custom minimum README content length in characters
                 },
             }
         }
@@ -95,3 +102,105 @@ def test_cli_format_options():
     )
     assert returncode != 0, "Should fail with invalid format"
     assert "Error" in (stderr + stdout)
+
+
+@pytest.fixture
+def readme_check():
+    config = Config({"thresholds": {"min_readme_length": 50}})
+    return ReadmeCheck(config=config)
+
+
+@pytest.fixture
+def mock_codebase():
+    codebase = MagicMock()
+    codebase.root_path = Path("/fake/repo")
+    return codebase
+
+
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.is_file")
+def test_no_readme_found(mock_is_file, mock_exists, readme_check, mock_codebase):
+    # Mock no README files exist
+    mock_exists.return_value = False
+    mock_is_file.return_value = True
+
+    result = readme_check.run(mock_codebase)
+
+    assert result.status == CheckStatus.FAIL
+    assert result.check_id == "readme"
+    assert "No README file found" in result.message
+    assert not result.details["readme_found"]
+
+
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.is_file")
+@patch("builtins.open", new_callable=mock_open, read_data="   \n  \t  ")
+def test_empty_readme(
+    mock_file, mock_is_file, mock_exists, readme_check, mock_codebase
+):
+    # Mock README.md exists but is empty
+    mock_exists.return_value = True
+    mock_is_file.return_value = True
+
+    result = readme_check.run(mock_codebase)
+
+    assert result.status == CheckStatus.FAIL
+    assert result.check_id == "readme"
+    assert "insufficient content" in result.message
+    assert result.details["readme_found"]
+    assert not result.details["has_content"]
+
+
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.is_file")
+def test_valid_readme(mock_is_file, mock_exists, readme_check, mock_codebase):
+    # Mock README.md exists with content
+    mock_exists.return_value = True
+    mock_is_file.return_value = True
+
+    # Use os.path.join for platform-independent path handling
+    readme_path = os.path.join(str(mock_codebase.root_path), "README.md")
+
+    # Setup different content for different README files
+    readme_contents = {
+        readme_path: "This is a README with plenty of content that will definitely pass the check because it is much longer than the minimum threshold of 50 characters.",
+    }
+
+    def mock_open_side_effect(file, *args, **kwargs):
+        file_path = str(file)
+        content = readme_contents.get(file_path, "")
+        return mock_open(read_data=content)()
+
+    with patch("builtins.open", side_effect=mock_open_side_effect):
+        result = readme_check.run(mock_codebase)
+
+    assert result.status == CheckStatus.PASS
+    assert result.check_id == "readme"
+    assert "sufficient content" in result.message
+    assert result.details["readme_found"]
+    assert result.details["has_content"]
+
+
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.is_file")
+def test_multiple_readme_files(mock_is_file, mock_exists, readme_check, mock_codebase):
+    # Mock multiple README files exist
+    mock_exists.return_value = True
+    mock_is_file.return_value = True
+
+    # Setup different content for different README files
+    readme_contents = {
+        "/fake/repo/README.md": "# Empty",  # Too short
+        "/fake/repo/README.rst": "This README has enough content to pass the check.",  # Long enough
+    }
+
+    def mock_open_side_effect(file, *args, **kwargs):
+        file_path = str(file)
+        content = readme_contents.get(file_path, "")
+        return mock_open(read_data=content)()
+
+    with patch("builtins.open", side_effect=mock_open_side_effect):
+        result = readme_check.run(mock_codebase)
+
+    # Should fail because at least one README does not have enough content
+    assert result.status == CheckStatus.FAIL

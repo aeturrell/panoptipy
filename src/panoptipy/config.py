@@ -30,6 +30,7 @@ class Config:
         },
         "thresholds": {
             "max_file_size": 500,
+            "min_readme_length": 100,  # in characters
         },
     }
 

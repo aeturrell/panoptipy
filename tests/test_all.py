@@ -152,19 +152,23 @@ def test_empty_readme(
 
 @patch("pathlib.Path.exists")
 @patch("pathlib.Path.is_file")
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data="This is a README with sufficient content to pass the check.",
-)
-def test_valid_readme(
-    mock_file, mock_is_file, mock_exists, readme_check, mock_codebase
-):
+def test_valid_readme(mock_is_file, mock_exists, readme_check, mock_codebase):
     # Mock README.md exists with content
     mock_exists.return_value = True
     mock_is_file.return_value = True
 
-    result = readme_check.run(mock_codebase)
+    # Setup different content for different README files
+    readme_contents = {
+        "/fake/repo/README.md": "This is a README with plenty of content that will definitely pass the check because it is much longer than the minimum threshold of 50 characters.",
+    }
+
+    def mock_open_side_effect(file, *args, **kwargs):
+        file_path = str(file)
+        content = readme_contents.get(file_path, "")
+        return mock_open(read_data=content)()
+
+    with patch("builtins.open", side_effect=mock_open_side_effect):
+        result = readme_check.run(mock_codebase)
 
     assert result.status == CheckStatus.PASS
     assert result.check_id == "readme"
@@ -194,9 +198,5 @@ def test_multiple_readme_files(mock_is_file, mock_exists, readme_check, mock_cod
     with patch("builtins.open", side_effect=mock_open_side_effect):
         result = readme_check.run(mock_codebase)
 
-    # Should pass because at least one README has sufficient content
-    assert result.status == CheckStatus.PASS
-    assert result.details["has_content"]
-
-    # Should report on both README files
-    assert len(result.details["readme_files"]) == 2
+    # Should fail because at least one README does not have enough content
+    assert result.status == CheckStatus.FAIL

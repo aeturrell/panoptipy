@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../favicon.ico" rel="icon">
+<link href="../favicon.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d1b12f2568ecbe55642fee6aa00bd082.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d75320580429fd03ccc14abf5aea7e44.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -208,10 +208,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#panoptipy.checks.CheckResult" id="toc-panoptipy.checks.CheckResult" class="nav-link" data-scroll-target="#panoptipy.checks.CheckResult">CheckResult</a></li>
   <li><a href="#panoptipy.checks.CheckStatus" id="toc-panoptipy.checks.CheckStatus" class="nav-link" data-scroll-target="#panoptipy.checks.CheckStatus">CheckStatus</a></li>
   <li><a href="#panoptipy.checks.DocstringCheck" id="toc-panoptipy.checks.DocstringCheck" class="nav-link" data-scroll-target="#panoptipy.checks.DocstringCheck">DocstringCheck</a></li>
+  <li><a href="#panoptipy.checks.HasTestsCheck" id="toc-panoptipy.checks.HasTestsCheck" class="nav-link" data-scroll-target="#panoptipy.checks.HasTestsCheck">HasTestsCheck</a></li>
   <li><a href="#panoptipy.checks.LargeFilesCheck" id="toc-panoptipy.checks.LargeFilesCheck" class="nav-link" data-scroll-target="#panoptipy.checks.LargeFilesCheck">LargeFilesCheck</a></li>
   <li><a href="#panoptipy.checks.PrivateKeyCheck" id="toc-panoptipy.checks.PrivateKeyCheck" class="nav-link" data-scroll-target="#panoptipy.checks.PrivateKeyCheck">PrivateKeyCheck</a></li>
   <li><a href="#panoptipy.checks.PydoclintCheck" id="toc-panoptipy.checks.PydoclintCheck" class="nav-link" data-scroll-target="#panoptipy.checks.PydoclintCheck">PydoclintCheck</a></li>
   <li><a href="#panoptipy.checks.PyprojectTomlValidateCheck" id="toc-panoptipy.checks.PyprojectTomlValidateCheck" class="nav-link" data-scroll-target="#panoptipy.checks.PyprojectTomlValidateCheck">PyprojectTomlValidateCheck</a></li>
+  <li><a href="#panoptipy.checks.ReadmeCheck" id="toc-panoptipy.checks.ReadmeCheck" class="nav-link" data-scroll-target="#panoptipy.checks.ReadmeCheck">ReadmeCheck</a></li>
   <li><a href="#panoptipy.checks.RuffFormatCheck" id="toc-panoptipy.checks.RuffFormatCheck" class="nav-link" data-scroll-target="#panoptipy.checks.RuffFormatCheck">RuffFormatCheck</a></li>
   <li><a href="#panoptipy.checks.RuffLintingCheck" id="toc-panoptipy.checks.RuffLintingCheck" class="nav-link" data-scroll-target="#panoptipy.checks.RuffLintingCheck">RuffLintingCheck</a></li>
   </ul></li>
@@ -256,20 +258,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Check to ensure documentation included via docstrings in Python codebase.</td>
 </tr>
 <tr class="odd">
+<td><a href="#panoptipy.checks.HasTestsCheck">HasTestsCheck</a></td>
+<td>A check that identifies test files and test functions without executing code.</td>
+</tr>
+<tr class="even">
 <td><a href="#panoptipy.checks.LargeFilesCheck">LargeFilesCheck</a></td>
 <td>A check that identifies large files in version control that exceed a specified size threshold.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#panoptipy.checks.PrivateKeyCheck">PrivateKeyCheck</a></td>
 <td>A security check that scans files for private key patterns.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#panoptipy.checks.PydoclintCheck">PydoclintCheck</a></td>
 <td>A check implementation to validate docstring compatibility with type signatures using pydoclint.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#panoptipy.checks.PyprojectTomlValidateCheck">PyprojectTomlValidateCheck</a></td>
 <td>A check class that validates the pyproject.toml file format and schema.</td>
+</tr>
+<tr class="even">
+<td><a href="#panoptipy.checks.ReadmeCheck">ReadmeCheck</a></td>
+<td>A check that verifies the existence and content of a README file.</td>
 </tr>
 <tr class="odd">
 <td><a href="#panoptipy.checks.RuffFormatCheck">RuffFormatCheck</a></td>
@@ -377,13 +387,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="panoptipy.checks.LargeFilesCheck" class="level3">
-<h3 class="anchored" data-anchor-id="panoptipy.checks.LargeFilesCheck">LargeFilesCheck</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>checks.LargeFilesCheck(<span class="va">self</span>, config<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>A check that identifies large files in version control that exceed a specified size threshold.</p>
-<p>This check examines all tracked files in the repository and reports those that are larger than the configured maximum size. This helps identify potentially problematic large files that could bloat the repository or data that have been added to version control by mistake.</p>
+<section id="panoptipy.checks.HasTestsCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.HasTestsCheck">HasTestsCheck</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>checks.HasTestsCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check that identifies test files and test functions without executing code.</p>
+<p>This check searches for test files following standard Python testing conventions (test_<em>.py or </em>_test.py) and identifies test functions using AST parsing. It counts and reports test functions that follow these patterns:</p>
+<ul>
+<li>Functions prefixed with ‘test_’</li>
+<li>Methods prefixed with ‘test_’ inside classes prefixed with ‘Test’</li>
+<li>Static and class methods prefixed with ‘test_’ inside test classes</li>
+</ul>
+<p>The check provides a count of all identified test items without executing any code.</p>
 <section id="attributes-2" class="level4 doc-section doc-section-attributes">
 <h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-2">Attributes</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>check_id</td>
+<td>str</td>
+<td>Identifier for this check, set to “has_tests”</td>
+</tr>
+<tr class="even">
+<td>description</td>
+<td>str</td>
+<td>Description of what this check does</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="panoptipy.checks.LargeFilesCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.LargeFilesCheck">LargeFilesCheck</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>checks.LargeFilesCheck(<span class="va">self</span>, config<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check that identifies large files in version control that exceed a specified size threshold.</p>
+<p>This check examines all tracked files in the repository and reports those that are larger than the configured maximum size. This helps identify potentially problematic large files that could bloat the repository or data that have been added to version control by mistake.</p>
+<section id="attributes-3" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-3">Attributes</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 13%">
@@ -414,11 +460,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="panoptipy.checks.PrivateKeyCheck" class="level3">
 <h3 class="anchored" data-anchor-id="panoptipy.checks.PrivateKeyCheck">PrivateKeyCheck</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>checks.PrivateKeyCheck(<span class="va">self</span>, additional_patterns<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>checks.PrivateKeyCheck(<span class="va">self</span>, additional_patterns<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>A security check that scans files for private key patterns.</p>
 <p>This class implements a security check to detect private keys in version-controlled files by looking for common private key header patterns. It helps prevent accidental exposure of sensitive credentials in source code repositories.</p>
-<section id="attributes-3" class="level4 doc-section doc-section-attributes">
-<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-3">Attributes</h4>
+<section id="attributes-4" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-4">Attributes</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 13%">
@@ -476,40 +522,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="panoptipy.checks.PydoclintCheck" class="level3">
 <h3 class="anchored" data-anchor-id="panoptipy.checks.PydoclintCheck">PydoclintCheck</h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>checks.PydoclintCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>checks.PydoclintCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>A check implementation to validate docstring compatibility with type signatures using pydoclint.</p>
 <p>This class extends the base Check class to verify that docstrings in Python files match their corresponding type signatures. It uses the pydoclint tool to perform the validation.</p>
 <p>The check will: 1. Find all Python files in version control 2. Filter files to only those containing both docstrings and type annotations 3. Run pydoclint on the filtered files 4. Report any mismatches between docstrings and type signatures</p>
-<section id="attributes-4" class="level4 doc-section doc-section-attributes">
-<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-4">Attributes</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>check_id</td>
-<td>str</td>
-<td>Identifier for this check, set to “pydoclint”</td>
-</tr>
-<tr class="even">
-<td>description</td>
-<td>str</td>
-<td>Description of what this check does</td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
-<section id="panoptipy.checks.PyprojectTomlValidateCheck" class="level3">
-<h3 class="anchored" data-anchor-id="panoptipy.checks.PyprojectTomlValidateCheck">PyprojectTomlValidateCheck</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>checks.PyprojectTomlValidateCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>A check class that validates the pyproject.toml file format and schema.</p>
-<p>This check validates both the TOML syntax and the schema of pyproject.toml using the validate-pyproject API. It verifies that the file exists in the codebase root directory and contains valid configuration.</p>
 <section id="attributes-5" class="level4 doc-section doc-section-attributes">
 <h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-5">Attributes</h4>
 <table class="caption-top table">
@@ -535,13 +551,83 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="panoptipy.checks.RuffFormatCheck" class="level3">
-<h3 class="anchored" data-anchor-id="panoptipy.checks.RuffFormatCheck">RuffFormatCheck</h3>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>checks.RuffFormatCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>A check class that verifies code formatting using ruff format.</p>
-<p>This class implements a check to ensure that code follows formatting according to ruff format standards. It runs the ‘ruff format –check’ command on the codebase and reports any formatting inconsistencies.</p>
+<section id="panoptipy.checks.PyprojectTomlValidateCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.PyprojectTomlValidateCheck">PyprojectTomlValidateCheck</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>checks.PyprojectTomlValidateCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check class that validates the pyproject.toml file format and schema.</p>
+<p>This check validates both the TOML syntax and the schema of pyproject.toml using the validate-pyproject API. It verifies that the file exists in the codebase root directory and contains valid configuration.</p>
 <section id="attributes-6" class="level4 doc-section doc-section-attributes">
 <h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-6">Attributes</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>check_id</td>
+<td>str</td>
+<td>Identifier for this check, set to “pydoclint”</td>
+</tr>
+<tr class="even">
+<td>description</td>
+<td>str</td>
+<td>Description of what this check does</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="panoptipy.checks.ReadmeCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.ReadmeCheck">ReadmeCheck</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>checks.ReadmeCheck(<span class="va">self</span>, config<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check that verifies the existence and content of a README file.</p>
+<p>This check searches for README files in common formats (md, rst, txt) in the repository root and verifies that they contain sufficient content. A README is considered “empty” if it contains fewer than a configurable number of non-whitespace characters.</p>
+<section id="attributes-7" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-7">Attributes</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 7%">
+<col style="width: 74%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>check_id</td>
+<td>str</td>
+<td>Identifier for this check, set to “readme”</td>
+</tr>
+<tr class="even">
+<td>description</td>
+<td>str</td>
+<td>Description of what this check does</td>
+</tr>
+<tr class="odd">
+<td>min_content_length</td>
+<td>int</td>
+<td>Minimum content length (in characters) for a README to be considered non-empty</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="panoptipy.checks.RuffFormatCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.RuffFormatCheck">RuffFormatCheck</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>checks.RuffFormatCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check class that verifies code formatting using ruff format.</p>
+<p>This class implements a check to ensure that code follows formatting according to ruff format standards. It runs the ‘ruff format –check’ command on the codebase and reports any formatting inconsistencies.</p>
+<section id="attributes-8" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-8">Attributes</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 18%">
@@ -572,11 +658,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="panoptipy.checks.RuffLintingCheck" class="level3">
 <h3 class="anchored" data-anchor-id="panoptipy.checks.RuffLintingCheck">RuffLintingCheck</h3>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>checks.RuffLintingCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>checks.RuffLintingCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>A Check implementation that performs linting using the Ruff linter.</p>
 <p>This class runs the Ruff linter on a codebase to identify code style and quality issues.</p>
-<section id="attributes-7" class="level4 doc-section doc-section-attributes">
-<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-7">Attributes</h4>
+<section id="attributes-9" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-9">Attributes</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 17%">

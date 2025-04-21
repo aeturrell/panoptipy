@@ -816,7 +816,7 @@ class PytestCheck(Check):
         # Look for the "collected X items" line
         import re
 
-        count_match = re.search(r"collected (\d+) items", output)
+        count_match = re.search(r"\ncollected (\d+) items\n", output)
         if count_match:
             test_count = int(count_match.group(1))
 
@@ -860,13 +860,13 @@ class PytestCheck(Check):
             if test_count > 0:
                 return success_result(
                     check_id=self.check_id,
-                    message=f"Found {test_count} pytest tests in the codebase",
+                    message=f"Found {test_count} tests in the codebase",
                     details=parsed_info,
                 )
             else:
                 return fail_result(
                     check_id=self.check_id,
-                    message="No pytest tests found in the codebase",
+                    message="No tests found in the codebase",
                     details=parsed_info,
                 )
 

@@ -1,7 +1,7 @@
 """Console reporter for panoptipy using Rich for terminal output."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from rich import box
 from rich.console import Console
@@ -38,14 +38,30 @@ class ConsoleReporter(BaseReporter):
         "problematic": "red",
     }
 
-    def __init__(self, use_emoji: bool = True, show_details: bool = False):
+    def __init__(
+        self,
+        use_emoji: bool = True,
+        show_details: bool = False,
+        export_format: Optional[Literal["svg", "html"]] = None,
+        output_path: Optional[Path] = None,
+    ):
         """Initialize the console reporter.
 
         Args:
             use_emoji: Whether to use emoji instead of simple symbols
             show_details: Whether to show detailed information for failures
+            export_format: Format to export console output to (svg or html)
+            output_path: Path to save exported output (required if export_format is set)
         """
-        self.console = Console(force_terminal=True, color_system="auto", safe_box=True)
+        self.export_format = export_format
+        self.output_path = output_path
+
+        # If exporting, enable recording on the console
+        record = export_format is not None
+        self.console = Console(
+            force_terminal=True, color_system="auto", safe_box=True, record=record
+        )
+
         self.use_emoji = use_emoji
         self.show_details = show_details
 
@@ -120,6 +136,23 @@ class ConsoleReporter(BaseReporter):
             self._display_results_table(results, repo_path)
             if self.show_details:
                 self._display_details(results, repo_path)
+
+        # Export the console output if requested
+        if self.export_format and self.output_path:
+            self._export_console_output()
+
+    def _export_console_output(self) -> None:
+        """Export the console output to the specified format."""
+        if not self.export_format or not self.output_path:
+            return
+
+        if self.export_format == "svg":
+            self.console.save_svg(self.output_path, title="Panoptipy Report")
+        elif self.export_format == "html":
+            self.console.save_html(
+                self.output_path,
+                theme="dark" if self.console.color_system != "windows" else "light",
+            )
 
     def report_with_progress(self, checks: List[str]) -> None:
         """Display a progress indicator while checks are running.
@@ -333,15 +366,25 @@ class ConsoleReporter(BaseReporter):
 
 
 def create_reporter(
-    show_details: bool = True, use_emoji: bool = True
+    show_details: bool = True,
+    use_emoji: bool = True,
+    export_format: Optional[Literal["svg", "html"]] = None,
+    output_path: Optional[Path] = None,
 ) -> ConsoleReporter:
     """Create a console reporter with the specified options.
 
     Args:
         show_details: Whether to show detailed information for failures
         use_emoji: Whether to use emoji instead of simple symbols
+        export_format: Format to export console output to (svg or html)
+        output_path: Path to save exported output (required if export_format is set)
 
     Returns:
         Configured console reporter
     """
-    return ConsoleReporter(use_emoji=use_emoji, show_details=show_details)
+    return ConsoleReporter(
+        use_emoji=use_emoji,
+        show_details=show_details,
+        export_format=export_format,
+        output_path=output_path,
+    )

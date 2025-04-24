@@ -8,7 +8,7 @@ from .console import ConsoleReporter
 from .json import JSONReporter
 from .parquet import ParquetReporter
 
-ReporterFormat = Literal["console", "json", "parquet"]
+ReporterFormat = Literal["console", "json", "parquet", "svg", "html"]
 
 
 def get_reporter(
@@ -20,8 +20,8 @@ def get_reporter(
     """Get a reporter instance based on the specified format.
 
     Args:
-        format: Output format ("console", "json", or "parquet")
-        output_path: Path for output file (required for parquet format)
+        format: Output format ("console", "json", "parquet", "svg", or "html")
+        output_path: Path for output file (required for parquet, svg, and html formats)
         config: Configuration object
         **kwargs: Additional keyword arguments to pass to the reporter
 
@@ -29,7 +29,7 @@ def get_reporter(
         Reporter instance
 
     Raises:
-        ValueError: If the specified format is not supported
+        ValueError: If the specified format is not supported or missing required arguments
     """
     # Get show_details from config if not explicitly provided
     if "show_details" not in kwargs and config:
@@ -43,5 +43,9 @@ def get_reporter(
         if not output_path:
             raise ValueError("output_path is required for parquet format")
         return ParquetReporter(output_path=output_path, **kwargs)
+    elif format in ["svg", "html"]:
+        if not output_path:
+            raise ValueError(f"output_path is required for {format} format")
+        return ConsoleReporter(export_format=format, output_path=output_path, **kwargs)
     else:
         raise ValueError(f"Unknown reporter format: {format}")

@@ -12,7 +12,7 @@ from .github import GitHubClient, GitHubScanner
 from .registry import CheckRegistry
 from .reporters import get_reporter
 
-reporters_accepting_output_paths: List[str] = ["json", "parquet"]
+reporters_accepting_output_paths: List[str] = ["json", "parquet", "svg", "html"]
 
 
 @click.group()
@@ -31,12 +31,12 @@ def common_output_options(func):
             "-f",
             type=str,
             default="console",
-            help="Output format (console, html, json)",
+            help="Output format (console, json, parquet, svg, html)",
         ),
         click.option(
             "--output",
             type=click.Path(path_type=Path),
-            help="Output file path (required for parquet format; optional for json)",
+            help="Output file path (required for parquet, svg, and html formats; optional for json)",
         ),
     ]
     for option in reversed(options):

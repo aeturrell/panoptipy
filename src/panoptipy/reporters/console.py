@@ -163,21 +163,19 @@ class ConsoleReporter(BaseReporter):
         Args:
             results: List of check results
         """
-        # Count results by status
-        status_counts = {}
-        for result in results:
-            status = result.status.value
-            status_counts[status] = status_counts.get(status, 0) + 1
+        # Import here to avoid circular imports
+        from ..config import Config
+        from ..rating import RatingCalculator
 
-        total = len(results)
-        pass_count = status_counts.get("pass", 0)
-        pass_percentage = (pass_count / total) * 100 if total > 0 else 0
+        # Create calculator with default config if needed
+        calculator = RatingCalculator(Config.load())
+        stats = calculator.calculate_summary_stats(results)
 
         # Display summary
         self.console.print("\n[bold]Summary:[/bold]")
-        self.console.print(f"Total checks: {total}")
+        self.console.print(f"Total checks: {stats['total_checks']}")
 
-        for status, count in status_counts.items():
+        for status, count in stats["status_counts"].items():
             style = self.STATUS_STYLES.get(status, {}).get("color", "white")
             self.console.print(
                 f"{status.capitalize()}: [bold {style}]{count}[/bold {style}]"
@@ -185,13 +183,13 @@ class ConsoleReporter(BaseReporter):
 
         color = (
             "green"
-            if pass_percentage >= 80
+            if stats["pass_percentage"] >= 80
             else "yellow"
-            if pass_percentage >= 60
+            if stats["pass_percentage"] >= 60
             else "red"
         )
         self.console.print(
-            f"Pass rate: [bold {color}]{pass_percentage:.1f}%[/bold {color}]"
+            f"Pass rate: [bold {color}]{stats['pass_percentage']:.1f}%[/bold {color}]"
         )
 
     def _display_results_table(

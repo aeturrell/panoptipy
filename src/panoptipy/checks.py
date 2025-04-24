@@ -675,7 +675,7 @@ class PydoclintCheck(Check):
             return CheckResult(
                 check_id=self.check_id,
                 status=CheckStatus.SKIP,
-                message="No Python files with both docstrings and type signatures found",
+                message="No functions with both docstrings and type signatures to check; skipping",
                 details={"skipped_files": skipped},
             )
         issues = []
@@ -697,7 +697,7 @@ class PydoclintCheck(Check):
         if issues:
             return fail_result(
                 check_id=self.check_id,
-                message=f"Found {len(issues)} docstring issues in {len(to_check)} files",
+                message=f"Found {len(issues)} places in {len(to_check)} files where docstrings do not match type signatures",
                 details={
                     "docstring_issues": issues,
                     "files_checked": len(to_check),

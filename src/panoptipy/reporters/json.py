@@ -82,19 +82,18 @@ class JSONReporter(BaseReporter):
         Returns:
             Summary dictionary
         """
-        status_counts = {}
-        for result in results:
-            status = result.status.value
-            status_counts[status] = status_counts.get(status, 0) + 1
+        # Import here to avoid circular imports
+        from ..config import Config
+        from ..rating import RatingCalculator
 
-        total = len(results)
-        pass_count = status_counts.get("pass", 0)
-        pass_percentage = (pass_count / total) * 100 if total > 0 else 0.0
+        # Create calculator with default config if needed
+        calculator = RatingCalculator(Config.load())
+        stats = calculator.calculate_summary_stats(results)
 
         return {
-            "total_checks": total,
-            "status_counts": status_counts,
-            "pass_rate": round(pass_percentage, 1),
+            "total_checks": stats["total_checks"],
+            "status_counts": stats["status_counts"],
+            "pass_rate": round(stats["pass_percentage"], 1),
         }
 
     def _serialize_results(self, results: List["CheckResult"]) -> List[Dict[str, Any]]:

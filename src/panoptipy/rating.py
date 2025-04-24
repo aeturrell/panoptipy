@@ -2,7 +2,7 @@
 """Rating system for panoptipy codebase analysis."""
 
 from enum import Enum
-from typing import List
+from typing import Any, Dict, List
 
 from .checks import CheckResult, CheckStatus
 from .config import Config
@@ -90,6 +90,38 @@ class RatingCalculator:
             return 0.0
 
         passed = sum(1 for r in results if r.status == CheckStatus.PASS)
-        total = len(results)
+        total = sum(
+            1
+            for r in results
+            if r.status == CheckStatus.PASS or r.status == CheckStatus.FAIL
+        )
 
         return passed / total
+
+    def calculate_summary_stats(self, results: List[CheckResult]) -> Dict[str, Any]:
+        """Calculate summary statistics for check results.
+
+        Args:
+            results: List of check results
+
+        Returns:
+            Dictionary containing summary statistics
+        """
+        # Count results by status
+        status_counts = {}
+        for result in results:
+            status = result.status.value
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        total = len(results)
+        pass_count = status_counts.get("pass", 0)
+        pass_ratio = self._calculate_pass_ratio(results)
+        pass_percentage = pass_ratio * 100
+
+        return {
+            "total_checks": total,
+            "status_counts": status_counts,
+            "pass_count": pass_count,
+            "pass_ratio": pass_ratio,
+            "pass_percentage": pass_percentage,
+        }

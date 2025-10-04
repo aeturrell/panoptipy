@@ -164,7 +164,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#what-is-panoptipy-for" id="toc-what-is-panoptipy-for" class="nav-link" data-scroll-target="#what-is-panoptipy-for">What is <strong>panoptipy</strong> for?</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
   <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
-  <li><a href="#github-integration" id="toc-github-integration" class="nav-link" data-scroll-target="#github-integration">GitHub integration</a></li>
   <li><a href="#options" id="toc-options" class="nav-link" data-scroll-target="#options">Options</a>
   <ul class="collapse">
   <li><a href="#configuration" id="toc-configuration" class="nav-link" data-scroll-target="#configuration">Configuration</a></li>
@@ -247,33 +246,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
 <p>You can find the full documentation for <strong>panoptipy</strong> at <a href="https://aeturrell.github.io/panoptipy/">https://aeturrell.github.io/panoptipy/</a>.</p>
 </section>
-<section id="github-integration" class="level2">
-<h2 class="anchored" data-anchor-id="github-integration">GitHub integration</h2>
-<p><strong>panoptipy</strong> can be used to scan multiple GitHub repositories. This is useful for people or organisations that want to assess the quality of their codebases.</p>
-<p>Note that, even for scanning public repos, you will need a GitHub token. You can find out more about authenticating with the GitHub GraphQL API <a href="https://docs.github.com/en/graphql/guides/forming-calls-with-graphql">here</a>.</p>
-<p>The two commands that run against multiple GitHub repositories are <code>scan-user</code> and <code>scan-team</code>.</p>
-<p>Here’s how to use them:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub user</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user USERNAME <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub team</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-team ORGANISATION_NAME TEAM_NAME <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You can also limit the repositories that are scanned by using the <code>--max-repos</code> option. This is useful if you want to test the tool on a small number of repositories before running it on all of them.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all repos by a given GitHub user but limit to only retrieving the fist 5 repos</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan-user USERNAME <span class="at">--max-repos</span> 5 <span class="at">--token</span> YOUR_GITHUB_TOKEN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
 <section id="options" class="level2">
 <h2 class="anchored" data-anchor-id="options">Options</h2>
 <section id="configuration" class="level3">
 <h3 class="anchored" data-anchor-id="configuration">Configuration</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan with custom configuration file</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--config</span> path/to/config.toml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan with custom configuration file</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--config</span> path/to/config.toml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>If you wish to configure <em>panoptipy</em> to your needs, you can do so by passing a TOML file with the <code>--config</code> option. Here’s an example of a configuration file in TOML:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy]</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">checks</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">enabled</span><span class="op"> =</span> <span class="op">[</span><span class="st">"large_files"</span><span class="op">,</span> <span class="st">"ruff_linting"</span><span class="op">], </span><span class="dt">disabled</span><span class="op"> =</span> <span class="op">[], </span><span class="dt">critical</span><span class="op"> =</span> <span class="op">[</span><span class="st">"ruff_linting"</span><span class="op">] }</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy.thresholds]</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">max_file_size</span> <span class="op">=</span> <span class="dv">1000</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="dt">min_readme_length</span> <span class="op">=</span> <span class="dv">200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy]</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">checks</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">enabled</span><span class="op"> =</span> <span class="op">[</span><span class="st">"large_files"</span><span class="op">,</span> <span class="st">"ruff_linting"</span><span class="op">], </span><span class="dt">disabled</span><span class="op"> =</span> <span class="op">[], </span><span class="dt">critical</span><span class="op"> =</span> <span class="op">[</span><span class="st">"ruff_linting"</span><span class="op">] }</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.panoptipy.thresholds]</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="dt">max_file_size</span> <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="dt">min_readme_length</span> <span class="op">=</span> <span class="dv">200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Note that <em>critical checks</em> are ones that cause CI/CD pipelines to fail. The CLI will:</p>
 <ul>
 <li>Exit with code 1 if any critical checks failed</li>
@@ -283,22 +268,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="command-line-output-options" class="level3">
 <h3 class="anchored" data-anchor-id="command-line-output-options">Command line output options</h3>
 <p>Although the default output is to the console, you can also specify some other options. The currently supported output formats are:</p>
-<div id="cell-7" class="cell" data-execution_count="1">
+<div id="cell-6" class="cell" data-execution_count="1">
 <div class="cell-output cell-output-stdout">
 <pre><code>['console', 'json', 'parquet', 'svg', 'html']</code></pre>
 </div>
 </div>
 <p>For example, to use the <code>json</code> format, you can run:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Or for <code>parquet</code>, you can run:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> parquet <span class="at">--output</span> /path/to/output.parquet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan /path/to/project <span class="at">--format</span> parquet <span class="at">--output</span> /path/to/output.parquet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Note that while the <code>--output</code> argument is optional for <code>json</code>, it is required for <code>parquet</code>.</p>
 </section>
 </section>
 <section id="example-use-on-this-repo" class="level2">
 <h2 class="anchored" data-anchor-id="example-use-on-this-repo">Example Use on This Repo</h2>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="cell-10" class="cell" data-execution_count="2">
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">panoptipy</span> scan .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-9" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Repository: ..
@@ -309,17 +294,19 @@ Repository: ..
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 Summary:
-Total checks: 10
+Total checks: 11
 Fail: 2
 Pass: 8
+Skip: 1
 Pass rate: 80.0%
                                                                                 
                               Check Results for ..                              
 ╭──────────┬─────────────────┬─────────────────────────────────────────────────╮
 │  Status  │ Check ID        │ Message                                         │
 ├──────────┼─────────────────┼─────────────────────────────────────────────────┤
-│ ❌       │ docstrings      │ Found 30 public items without docstrings        │
+│ ❌       │ docstrings      │ Found 32 public items without docstrings        │
 │ ❌       │ private_key     │ Found 1 files containing private keys           │
+│ ℹ        │ sql_linting     │ No SQL files found in version-controlled files  │
 │ ✅       │ ruff_linting    │ No linting issues found                         │
 │ ✅       │ ruff_format     │ All files are formatted                         │
 │ ✅       │ large_files     │ No version-controlled files exceed size         │
@@ -330,7 +317,7 @@ Pass rate: 80.0%
 │          │                 │ files                                           │
 │ ✅       │ pyproject_toml… │ pyproject.toml validated successfully by        │
 │          │                 │ validate-pyproject API.                         │
-│ ✅       │ has_tests       │ Found 8 tests in the codebase                   │
+│ ✅       │ has_tests       │ Found 10 tests in the codebase                  │
 │ ✅       │ readme          │ README exists with sufficient content           │
 ╰──────────┴─────────────────┴─────────────────────────────────────────────────╯
 
@@ -347,7 +334,7 @@ Details:
 │   • src/panoptipy/checks.py:run                                              │
 │   • src/panoptipy/checks.py:category                                         │
 │   • src/panoptipy/checks.py:run                                              │
-│   ... and 20 more                                                            │
+│   ... and 22 more                                                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭──────────────────────────────── private_key ─────────────────────────────────╮
 │ files_with_private_keys:                                                     │
@@ -361,54 +348,54 @@ Details:
 <section id="checks" class="level2">
 <h2 class="anchored" data-anchor-id="checks">Checks</h2>
 <p>There are several different available checks that can be run. These are:</p>
-<div id="cell-12" class="cell" data-execution_count="3">
+<div id="cell-11" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display" data-execution_count="3">
-<div id="qhzorhnzme" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ityvkxsfxo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#qhzorhnzme table {
+#ityvkxsfxo table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#qhzorhnzme thead, tbody, tfoot, tr, td, th { border-style: none; }
+#ityvkxsfxo thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#qhzorhnzme p { margin: 0; padding: 0; }
- #qhzorhnzme .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #qhzorhnzme .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #qhzorhnzme .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #qhzorhnzme .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #qhzorhnzme .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #qhzorhnzme .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #qhzorhnzme .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #qhzorhnzme .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #qhzorhnzme .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #qhzorhnzme .gt_column_spanner_outer:first-child { padding-left: 0; }
- #qhzorhnzme .gt_column_spanner_outer:last-child { padding-right: 0; }
- #qhzorhnzme .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #qhzorhnzme .gt_spanner_row { border-bottom-style: hidden; }
- #qhzorhnzme .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #qhzorhnzme .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
- #qhzorhnzme .gt_from_md> :first-child { margin-top: 0; }
- #qhzorhnzme .gt_from_md> :last-child { margin-bottom: 0; }
- #qhzorhnzme .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
- #qhzorhnzme .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
- #qhzorhnzme .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #qhzorhnzme .gt_row_group_first td { border-top-width: 2px; }
- #qhzorhnzme .gt_row_group_first th { border-top-width: 2px; }
- #qhzorhnzme .gt_striped { background-color: rgba(128,128,128,0.05); }
- #qhzorhnzme .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #qhzorhnzme .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #qhzorhnzme .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #qhzorhnzme .gt_left { text-align: left; }
- #qhzorhnzme .gt_center { text-align: center; }
- #qhzorhnzme .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #qhzorhnzme .gt_font_normal { font-weight: normal; }
- #qhzorhnzme .gt_font_bold { font-weight: bold; }
- #qhzorhnzme .gt_font_italic { font-style: italic; }
- #qhzorhnzme .gt_super { font-size: 65%; }
- #qhzorhnzme .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #qhzorhnzme .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#ityvkxsfxo p { margin: 0; padding: 0; }
+ #ityvkxsfxo .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #ityvkxsfxo .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #ityvkxsfxo .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #ityvkxsfxo .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #ityvkxsfxo .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ityvkxsfxo .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #ityvkxsfxo .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ityvkxsfxo .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #ityvkxsfxo .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #ityvkxsfxo .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #ityvkxsfxo .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #ityvkxsfxo .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #ityvkxsfxo .gt_spanner_row { border-bottom-style: hidden; }
+ #ityvkxsfxo .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #ityvkxsfxo .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #ityvkxsfxo .gt_from_md> :first-child { margin-top: 0; }
+ #ityvkxsfxo .gt_from_md> :last-child { margin-bottom: 0; }
+ #ityvkxsfxo .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #ityvkxsfxo .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; }
+ #ityvkxsfxo .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #ityvkxsfxo .gt_row_group_first td { border-top-width: 2px; }
+ #ityvkxsfxo .gt_row_group_first th { border-top-width: 2px; }
+ #ityvkxsfxo .gt_striped { background-color: rgba(128,128,128,0.05); }
+ #ityvkxsfxo .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #ityvkxsfxo .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #ityvkxsfxo .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #ityvkxsfxo .gt_left { text-align: left; }
+ #ityvkxsfxo .gt_center { text-align: center; }
+ #ityvkxsfxo .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #ityvkxsfxo .gt_font_normal { font-weight: normal; }
+ #ityvkxsfxo .gt_font_bold { font-weight: bold; }
+ #ityvkxsfxo .gt_font_italic { font-style: italic; }
+ #ityvkxsfxo .gt_super { font-size: 65%; }
+ #ityvkxsfxo .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #ityvkxsfxo .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 
@@ -457,6 +444,10 @@ Details:
 <td class="gt_row gt_left">Checks if tests are present in the codebase using AST parsing</td>
 </tr>
 <tr class="even">
+<td class="gt_row gt_left">sql_linting</td>
+<td class="gt_row gt_left">Checks SQL files for linting errors using sqlfluff</td>
+</tr>
+<tr class="odd">
 <td class="gt_row gt_left">readme</td>
 <td class="gt_row gt_left">Checks for the existence and content of a README file</td>
 </tr>

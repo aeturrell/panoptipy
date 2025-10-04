@@ -216,6 +216,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#panoptipy.checks.ReadmeCheck" id="toc-panoptipy.checks.ReadmeCheck" class="nav-link" data-scroll-target="#panoptipy.checks.ReadmeCheck">ReadmeCheck</a></li>
   <li><a href="#panoptipy.checks.RuffFormatCheck" id="toc-panoptipy.checks.RuffFormatCheck" class="nav-link" data-scroll-target="#panoptipy.checks.RuffFormatCheck">RuffFormatCheck</a></li>
   <li><a href="#panoptipy.checks.RuffLintingCheck" id="toc-panoptipy.checks.RuffLintingCheck" class="nav-link" data-scroll-target="#panoptipy.checks.RuffLintingCheck">RuffLintingCheck</a></li>
+  <li><a href="#panoptipy.checks.SqlLintingCheck" id="toc-panoptipy.checks.SqlLintingCheck" class="nav-link" data-scroll-target="#panoptipy.checks.SqlLintingCheck">SqlLintingCheck</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -288,6 +289,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="even">
 <td><a href="#panoptipy.checks.RuffLintingCheck">RuffLintingCheck</a></td>
 <td>A Check implementation that performs linting using the Ruff linter.</td>
+</tr>
+<tr class="odd">
+<td><a href="#panoptipy.checks.SqlLintingCheck">SqlLintingCheck</a></td>
+<td>A check that lints SQL files using sqlfluff.</td>
 </tr>
 </tbody>
 </table>
@@ -686,6 +691,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>description</td>
 <td>str</td>
 <td>Human readable description of what this check does</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="panoptipy.checks.SqlLintingCheck" class="level3">
+<h3 class="anchored" data-anchor-id="panoptipy.checks.SqlLintingCheck">SqlLintingCheck</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>checks.SqlLintingCheck(<span class="va">self</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A check that lints SQL files using sqlfluff.</p>
+<p>This check finds SQL files with database-relevant extensions and lints them using sqlfluff. It tries multiple SQL dialects for each file extension and only fails if ALL dialects fail.</p>
+<section id="attributes-10" class="level4 doc-section doc-section-attributes">
+<h4 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes-10">Attributes</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 25%">
+<col style="width: 51%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>check_id</td>
+<td>str</td>
+<td>Identifier for this check, set to “sql_linting”</td>
+</tr>
+<tr class="even">
+<td>description</td>
+<td>str</td>
+<td>Description of what this check does</td>
+</tr>
+<tr class="odd">
+<td>extension_to_dialects</td>
+<td>Dict[str, List[str]]</td>
+<td>Mapping of file extensions to possible SQL dialects</td>
 </tr>
 </tbody>
 </table>

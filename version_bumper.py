@@ -50,7 +50,7 @@ def bump_version(part: Literal["major", "minor", "patch"] = "patch") -> None:
             new_version,
         ]
     )
-
+    subprocess.run(["uv", "sync"])
     print(f"Version bumped to {major}.{minor}.{patch}")
 
 

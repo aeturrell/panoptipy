@@ -1,8 +1,5 @@
 # panoptipy
 
-> ⚠️ Under development; use not currently recommended
-
-
 A Package for the Static Code Quality Assessment of Python codebases. It scans local codebases or remote GitHub repositories and generates a report summarising various code quality metrics.
 
 ![SVG logo of panoptipy](docs/logo.svg)

@@ -26,6 +26,7 @@ dependencies = [
     "quartodoc>=0.9.1",
     "rich>=14.0.0",
     "ruff>=0.11.5",
+    "sqlfluff>=3.4.2",
     "toml>=0.10.2",
     "validate-pyproject[all]>=0.24.1",
 ]

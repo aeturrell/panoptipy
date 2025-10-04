@@ -972,6 +972,193 @@ class HasTestsCheck(Check):
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
 
 
+class SqlLintingCheck(Check):
+    """A check that lints SQL files using sqlfluff.
+
+    This check finds SQL files with database-relevant extensions and lints them
+    using sqlfluff. It tries multiple SQL dialects for each file extension and
+    only fails if ALL dialects fail.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "sql_linting"
+        description (str): Description of what this check does
+        extension_to_dialects (Dict[str, List[str]]): Mapping of file extensions to possible SQL dialects
+    """
+
+    def __init__(self):
+        super().__init__(
+            check_id="sql_linting",
+            description="Checks SQL files for linting errors using sqlfluff",
+        )
+        # Map file extensions to possible SQL dialects
+        self.extension_to_dialects = {
+            ".sql": ["ansi", "postgres", "mysql", "sqlite", "bigquery", "snowflake"],
+            ".pgsql": ["postgres"],
+            ".psql": ["postgres"],
+            ".mysql": ["mysql"],
+            ".bq": ["bigquery"],
+            ".ddl": ["ansi", "postgres", "mysql"],
+            ".dml": ["ansi", "postgres", "mysql"],
+            ".sqlite": ["sqlite"],
+            ".sqlite3": ["sqlite"],
+            ".db": ["sqlite"],
+            ".db3": ["sqlite"],
+            ".s3db": ["sqlite"],
+            ".sl3": ["sqlite"],
+        }
+
+    @property
+    def category(self) -> str:
+        return "linting"
+
+    def _get_sql_files(self, root_dir: str) -> List[str]:
+        """Find all SQL files in the repository."""
+        sql_files = []
+        for ext in self.extension_to_dialects.keys():
+            pattern = f"*{ext}"
+            files = get_tracked_files(root_dir, pattern)
+            sql_files.extend(files)
+        return sql_files
+
+    def _lint_file_with_dialect(
+        self, file_path: str, dialect: str
+    ) -> Tuple[bool, str, str]:
+        """Lint a SQL file with a specific dialect.
+
+        Args:
+            file_path: Path to SQL file
+            dialect: SQL dialect to use
+
+        Returns:
+            Tuple of (success, stdout, stderr)
+        """
+        try:
+            result = subprocess.run(
+                ["sqlfluff", "lint", "--dialect", dialect, file_path],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            # sqlfluff returns 0 for no issues, non-zero for issues or errors
+            success = result.returncode == 0
+            return success, result.stdout, result.stderr
+        except FileNotFoundError:
+            return False, "", "sqlfluff command not found"
+
+    def _parse_sqlfluff_output(self, output: str) -> List[Dict[str, Any]]:
+        """Parse sqlfluff output to extract issues."""
+        issues = []
+        lines = output.strip().split("\n")
+        for line in lines:
+            # Match lines like: L:   1 | P:   1 | LT01 | Expected single...
+            if "|" in line and ("L:" in line or "P:" in line):
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 4:
+                    try:
+                        # Extract line number
+                        line_num = None
+                        for part in parts:
+                            if part.startswith("L:"):
+                                line_num = int(part.split(":")[1].strip())
+                                break
+
+                        # Extract code and message
+                        code = parts[2] if len(parts) > 2 else ""
+                        message = parts[3] if len(parts) > 3 else ""
+
+                        if code and message:
+                            issues.append(
+                                {
+                                    "line": line_num,
+                                    "code": code,
+                                    "message": message,
+                                }
+                            )
+                    except (ValueError, IndexError):
+                        continue
+        return issues
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = str(codebase.root_path)
+
+        # Find all SQL files
+        sql_files = self._get_sql_files(root_dir)
+
+        if not sql_files:
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.SKIP,
+                message="No SQL files found in version-controlled files",
+            )
+
+        all_dialects_failed = []
+
+        for file_path in sql_files:
+            if not os.path.exists(file_path):
+                continue
+
+            # Get file extension
+            file_ext = os.path.splitext(file_path)[1]
+            dialects = self.extension_to_dialects.get(file_ext, ["ansi"])
+
+            # Try each dialect
+            dialect_results = {}
+            any_success = False
+
+            for dialect in dialects:
+                success, stdout, stderr = self._lint_file_with_dialect(
+                    file_path, dialect
+                )
+                dialect_results[dialect] = {
+                    "success": success,
+                    "stdout": stdout,
+                    "stderr": stderr,
+                }
+
+                if success:
+                    any_success = True
+                    break  # Found a dialect that works, no need to try others
+
+            # If no dialect succeeded, record the file
+            if not any_success:
+                rel_path = os.path.relpath(file_path, root_dir)
+
+                # Use the output from the first dialect tried
+                first_dialect = dialects[0]
+                output = dialect_results[first_dialect]["stdout"]
+                issues = self._parse_sqlfluff_output(output)
+
+                all_dialects_failed.append(
+                    {
+                        "file": rel_path,
+                        "dialects_tried": dialects,
+                        "issues": issues,
+                        "issue_count": len(issues),
+                    }
+                )
+
+        if all_dialects_failed:
+            total_issues = sum(f["issue_count"] for f in all_dialects_failed)
+            return fail_result(
+                check_id=self.check_id,
+                message=f"Found {total_issues} SQL linting issues in {len(all_dialects_failed)} files",
+                details={
+                    "files_with_issues": all_dialects_failed,
+                    "file_count": len(all_dialects_failed),
+                    "total_issues": total_issues,
+                },
+            )
+
+        return success_result(
+            check_id=self.check_id,
+            message=f"All {len(sql_files)} SQL files passed linting",
+            details={"files_checked": len(sql_files)},
+        )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
 class ReadmeCheck(Check):
     """A check that verifies the existence and content of a README file.
 

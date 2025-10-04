@@ -14,6 +14,7 @@ from .checks import (
     ReadmeCheck,
     RuffFormatCheck,
     RuffLintingCheck,
+    SqlLintingCheck,
 )
 from .config import Config
 
@@ -62,4 +63,5 @@ class CheckRegistry:
         self.register(PyprojectTomlValidateCheck())
         self.register(HasTestsCheck())
         self.register(ReadmeCheck(config=self.config))
+        self.register(SqlLintingCheck())
         # Add extra checks here

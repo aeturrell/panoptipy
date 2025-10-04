@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-1e4adc4738d01e9cee2329e023e43f50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c1ef1f14acc610acb7f84b3726103d52.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -206,8 +206,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#panoptipy.cli.cli" id="toc-panoptipy.cli.cli" class="nav-link" data-scroll-target="#panoptipy.cli.cli">cli</a></li>
   <li><a href="#panoptipy.cli.scan" id="toc-panoptipy.cli.scan" class="nav-link" data-scroll-target="#panoptipy.cli.scan">scan</a></li>
-  <li><a href="#panoptipy.cli.scan_team" id="toc-panoptipy.cli.scan_team" class="nav-link" data-scroll-target="#panoptipy.cli.scan_team">scan_team</a></li>
-  <li><a href="#panoptipy.cli.scan_user" id="toc-panoptipy.cli.scan_user" class="nav-link" data-scroll-target="#panoptipy.cli.scan_user">scan_user</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -240,14 +238,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td><a href="#panoptipy.cli.scan">scan</a></td>
 <td>Scan one or more local codebases for code quality issues.</td>
 </tr>
-<tr class="odd">
-<td><a href="#panoptipy.cli.scan_team">scan_team</a></td>
-<td>Scan repositories accessible to a team within a GitHub organization.</td>
-</tr>
-<tr class="even">
-<td><a href="#panoptipy.cli.scan_user">scan_user</a></td>
-<td>Scan public repositories of a GitHub user.</td>
-</tr>
 </tbody>
 </table>
 <section id="panoptipy.cli.cli" class="level3">
@@ -259,34 +249,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="panoptipy.cli.scan">scan</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cli.scan(paths, config, <span class="bu">format</span>, output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Scan one or more local codebases for code quality issues.</p>
-</section>
-<section id="panoptipy.cli.scan_team" class="level3">
-<h3 class="anchored" data-anchor-id="panoptipy.cli.scan_team">scan_team</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cli.scan_team(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    org,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    team,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    config,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">format</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    output,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    exclude_forks,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    max_repos,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    token,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Scan repositories accessible to a team within a GitHub organization.</p>
-</section>
-<section id="panoptipy.cli.scan_user" class="level3">
-<h3 class="anchored" data-anchor-id="panoptipy.cli.scan_user">scan_user</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cli.scan_user(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    username,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    config,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">format</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    output,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    include_private,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    exclude_forks,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    max_repos,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    token,</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Scan public repositories of a GitHub user.</p>
 
 
 </section>

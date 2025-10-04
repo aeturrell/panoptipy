@@ -204,3 +204,26 @@ def test_multiple_readme_files(mock_is_file, mock_exists, readme_check, mock_cod
 
     # Should fail because at least one README does not have enough content
     assert result.status == CheckStatus.FAIL
+
+
+def test_cli_sql_linting():
+    """Test that SQL linting check is available and works."""
+    from panoptipy.checks import SqlLintingCheck
+
+    check = SqlLintingCheck()
+
+    assert check.check_id == "sql_linting"
+    assert check.category == "linting"
+    assert "sql" in check.description.lower()
+
+
+def test_sql_linting_no_files(mock_codebase):
+    """Test SQL linting when no SQL files are present."""
+    from panoptipy.checks import CheckStatus, SqlLintingCheck
+
+    check = SqlLintingCheck()
+    with patch("panoptipy.checks.get_tracked_files", return_value=set()):
+        result = check.run(mock_codebase)
+
+    assert result.status == CheckStatus.SKIP
+    assert "No SQL files found" in result.message

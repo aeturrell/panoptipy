@@ -1,15 +1,13 @@
 """Tests for cli.py module."""
 
-import sys
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
 
 from panoptipy.checks import CheckResult, CheckStatus
 from panoptipy.cli import cli, common_output_options, run_scan
-from panoptipy.config import Config
 from panoptipy.rating import CodebaseRating
 
 
@@ -24,9 +22,7 @@ def mock_scanner():
     """Create a mock scanner."""
     scanner = MagicMock()
     scanner.scan_multiple.return_value = {
-        Path("/test/repo"): [
-            CheckResult("test_check", CheckStatus.PASS, "Test passed")
-        ]
+        Path("/test/repo"): [CheckResult("test_check", CheckStatus.PASS, "Test passed")]
     }
     scanner.rate.return_value = CodebaseRating.GOLD
     return scanner
@@ -56,7 +52,9 @@ def test_common_output_options_decorator():
 @patch("panoptipy.cli.Scanner")
 @patch("panoptipy.cli.Config")
 @patch("panoptipy.cli.get_reporter")
-def test_run_scan_success(mock_get_reporter, mock_config, mock_scanner_cls, mock_registry_cls, tmp_path):
+def test_run_scan_success(
+    mock_get_reporter, mock_config, mock_scanner_cls, mock_registry_cls, tmp_path
+):
     """Test run_scan function with successful scan."""
     # Setup mocks
     mock_config_obj = MagicMock()
@@ -255,7 +253,7 @@ def test_scan_command_with_format_option(mock_config, mock_run_scan, runner, tmp
 
     mock_run_scan.side_effect = lambda *args, **kwargs: None
 
-    result = runner.invoke(cli, ["scan", str(tmp_path), "--format", "json"])
+    runner.invoke(cli, ["scan", str(tmp_path), "--format", "json"])
 
     mock_run_scan.assert_called_once()
     # Check that format was passed correctly
@@ -275,9 +273,7 @@ def test_scan_command_with_output_option(mock_config, mock_run_scan, runner, tmp
 
     output_file = tmp_path / "output.json"
 
-    result = runner.invoke(
-        cli, ["scan", str(tmp_path), "--output", str(output_file)]
-    )
+    runner.invoke(cli, ["scan", str(tmp_path), "--output", str(output_file)])
 
     mock_run_scan.assert_called_once()
     call_args = mock_run_scan.call_args
@@ -314,9 +310,7 @@ def test_scan_command_with_config_option(mock_config, mock_run_scan, runner, tmp
 
     mock_run_scan.side_effect = lambda *args, **kwargs: None
 
-    result = runner.invoke(
-        cli, ["scan", str(tmp_path), "--config", str(config_file)]
-    )
+    runner.invoke(cli, ["scan", str(tmp_path), "--config", str(config_file)])
 
     mock_run_scan.assert_called_once()
     # Config path should be passed

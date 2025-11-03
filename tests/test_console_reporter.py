@@ -1,7 +1,7 @@
 """Tests for console reporter module."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from rich.console import Console
@@ -22,7 +22,9 @@ def sample_results():
     """Create sample check results."""
     return [
         CheckResult("check1", CheckStatus.PASS, "Check passed"),
-        CheckResult("check2", CheckStatus.FAIL, "Check failed", details={"error": "details"}),
+        CheckResult(
+            "check2", CheckStatus.FAIL, "Check failed", details={"error": "details"}
+        ),
         CheckResult("check3", CheckStatus.WARNING, "Check warning"),
         CheckResult("check4", CheckStatus.SKIP, "Check skipped"),
         CheckResult("check5", CheckStatus.ERROR, "Check error"),

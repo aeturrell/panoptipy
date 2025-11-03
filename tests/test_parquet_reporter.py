@@ -16,7 +16,9 @@ def sample_results():
     """Create sample check results."""
     return [
         CheckResult("check1", CheckStatus.PASS, "Check passed"),
-        CheckResult("check2", CheckStatus.FAIL, "Check failed", details={"error": "details"}),
+        CheckResult(
+            "check2", CheckStatus.FAIL, "Check failed", details={"error": "details"}
+        ),
         CheckResult("check3", CheckStatus.WARNING, "Check warning"),
     ]
 
@@ -116,7 +118,9 @@ class TestParquetReporter:
             "check", CheckStatus.FAIL, "Failed", details={"error": "test error"}
         )
         timestamp = datetime.now()
-        records = reporter._results_to_records([result], timestamp, "/test/repo", "gold")
+        records = reporter._results_to_records(
+            [result], timestamp, "/test/repo", "gold"
+        )
 
         assert len(records) == 1
         assert records[0]["details"] is not None
@@ -129,7 +133,9 @@ class TestParquetReporter:
 
         result = CheckResult("check", CheckStatus.PASS, "Passed")
         timestamp = datetime.now()
-        records = reporter._results_to_records([result], timestamp, "/test/repo", "gold")
+        records = reporter._results_to_records(
+            [result], timestamp, "/test/repo", "gold"
+        )
 
         assert len(records) == 1
         assert records[0]["details"] is None

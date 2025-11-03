@@ -1,7 +1,5 @@
 """Tests for reporters/__init__.py module."""
 
-from pathlib import Path
-
 import pytest
 
 from panoptipy.config import Config
@@ -120,7 +118,9 @@ class TestGetReporter:
     def test_get_reporter_parquet_with_kwargs(self, tmp_path):
         """Test getting parquet reporter with additional kwargs."""
         output_path = tmp_path / "output.parquet"
-        reporter = get_reporter(format="parquet", output_path=output_path, show_details=True)
+        reporter = get_reporter(
+            format="parquet", output_path=output_path, show_details=True
+        )
 
         assert isinstance(reporter, ParquetReporter)
         assert reporter.show_details is True

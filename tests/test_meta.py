@@ -2,9 +2,10 @@
 
 from unittest.mock import mock_open, patch
 
-import pytest
-
-from panoptipy.meta import extract_check_info_from_code, get_check_id_and_description_pairs
+from panoptipy.meta import (
+    extract_check_info_from_code,
+    get_check_id_and_description_pairs,
+)
 
 
 class TestExtractCheckInfoFromCode:
@@ -12,11 +13,11 @@ class TestExtractCheckInfoFromCode:
 
     def test_extract_single_check(self):
         """Test extracting a single check from code."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(check_id="test_check", description="Test description")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         assert len(result) == 1
@@ -25,7 +26,7 @@ class TestCheck(Check):
 
     def test_extract_multiple_checks(self):
         """Test extracting multiple checks from code."""
-        code = '''
+        code = """
 class Check1(Check):
     def __init__(self):
         super().__init__(check_id="check1", description="First check")
@@ -33,7 +34,7 @@ class Check1(Check):
 class Check2(Check):
     def __init__(self):
         super().__init__(check_id="check2", description="Second check")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         assert len(result) == 2
@@ -44,14 +45,14 @@ class Check2(Check):
 
     def test_extract_with_keyword_args(self):
         """Test extracting checks with keyword arguments."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(
             check_id="test_check",
             description="Test description"
         )
-'''
+"""
         result = extract_check_info_from_code(code)
 
         assert len(result) == 1
@@ -59,25 +60,25 @@ class TestCheck(Check):
 
     def test_extract_no_checks(self):
         """Test extracting from code with no checks."""
-        code = '''
+        code = """
 def some_function():
     pass
 
 class SomeClass:
     def __init__(self):
         self.value = 42
-'''
+"""
         result = extract_check_info_from_code(code)
 
         assert len(result) == 0
 
     def test_extract_incomplete_check(self):
         """Test extracting from code with incomplete check info."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(check_id="test_check")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should not include checks missing description
@@ -85,11 +86,11 @@ class TestCheck(Check):
 
     def test_extract_with_syntax_error(self):
         """Test extracting from code with syntax error."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self
         super().__init__(check_id="test_check", description="Test")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should return empty list on syntax error
@@ -104,11 +105,11 @@ class TestCheck(Check):
     def test_extract_with_ast_str_nodes(self):
         """Test extracting with AST Str nodes (Python 3.7 compatibility)."""
         # This tests the legacy ast.Str handling
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(check_id="test_check", description="Test description")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should work with both ast.Constant and ast.Str
@@ -116,11 +117,11 @@ class TestCheck(Check):
 
     def test_extract_only_check_id_provided(self):
         """Test extraction when only check_id is provided."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(check_id="test_only_id")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should not include if description is missing
@@ -128,11 +129,11 @@ class TestCheck(Check):
 
     def test_extract_only_description_provided(self):
         """Test extraction when only description is provided."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(description="Test only description")
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should not include if check_id is missing
@@ -140,7 +141,7 @@ class TestCheck(Check):
 
     def test_extract_with_category(self):
         """Test extraction with additional category parameter."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(
@@ -148,7 +149,7 @@ class TestCheck(Check):
             description="Test description",
             category="testing"
         )
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # Should still extract check_id and description
@@ -158,7 +159,7 @@ class TestCheck(Check):
 
     def test_extract_with_complex_init(self):
         """Test extraction with complex __init__ method."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self, config=None):
         self.config = config
@@ -167,7 +168,7 @@ class TestCheck(Check):
             description="Complex check description"
         )
         self.other_attr = "value"
-'''
+"""
         result = extract_check_info_from_code(code)
 
         assert len(result) == 1
@@ -175,7 +176,7 @@ class TestCheck(Check):
 
     def test_extract_from_multiline_string(self):
         """Test extraction with multiline string description."""
-        code = '''
+        code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(
@@ -183,7 +184,7 @@ class TestCheck(Check):
             description="This is a very long description "
                        "that spans multiple lines"
         )
-'''
+"""
         result = extract_check_info_from_code(code)
 
         # AST will combine the strings
@@ -196,11 +197,11 @@ class TestGetCheckIdAndDescriptionPairs:
     @patch("panoptipy.meta.importlib.resources.files")
     def test_get_pairs_success(self, mock_files):
         """Test getting check ID and description pairs successfully."""
-        mock_code = '''
+        mock_code = """
 class TestCheck(Check):
     def __init__(self):
         super().__init__(check_id="test_check", description="Test description")
-'''
+"""
         mock_file = mock_open(read_data=mock_code)
         mock_resource = mock_files.return_value.joinpath.return_value
         mock_resource.open.return_value.__enter__ = mock_file
@@ -214,8 +215,8 @@ class TestCheck(Check):
     @patch("panoptipy.meta.importlib.resources.files")
     def test_get_pairs_file_not_found(self, mock_files):
         """Test getting pairs when checks.py is not found."""
-        mock_files.return_value.joinpath.return_value.open.side_effect = FileNotFoundError(
-            "checks.py not found"
+        mock_files.return_value.joinpath.return_value.open.side_effect = (
+            FileNotFoundError("checks.py not found")
         )
 
         result = get_check_id_and_description_pairs()
@@ -253,7 +254,7 @@ class TestCheck(Check):
     @patch("panoptipy.meta.importlib.resources.files")
     def test_get_pairs_multiple_checks(self, mock_files):
         """Test getting pairs with multiple checks."""
-        mock_code = '''
+        mock_code = """
 class Check1(Check):
     def __init__(self):
         super().__init__(check_id="check1", description="First")
@@ -261,7 +262,7 @@ class Check1(Check):
 class Check2(Check):
     def __init__(self):
         super().__init__(check_id="check2", description="Second")
-'''
+"""
         mock_file = mock_open(read_data=mock_code)
         mock_resource = mock_files.return_value.joinpath.return_value
         mock_resource.open.return_value.__enter__ = mock_file

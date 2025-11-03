@@ -132,7 +132,9 @@ class _PrivateClass:
         py_file = tmp_path / "module.py"
         py_file.write_text(code)
 
-        info = FileInfo(path=py_file, content=code, is_binary=False, size_bytes=len(code))
+        info = FileInfo(
+            path=py_file, content=code, is_binary=False, size_bytes=len(code)
+        )
         module = PythonModule(info)
 
         public_items = module.get_public_items()
@@ -162,14 +164,20 @@ def undocumented_function():
         py_file = tmp_path / "module.py"
         py_file.write_text(code)
 
-        info = FileInfo(path=py_file, content=code, is_binary=False, size_bytes=len(code))
+        info = FileInfo(
+            path=py_file, content=code, is_binary=False, size_bytes=len(code)
+        )
         module = PythonModule(info)
 
         public_items = module.get_public_items()
 
         # Find the documented function
-        documented = [item for item in public_items if item["name"] == "documented_function"][0]
-        undocumented = [item for item in public_items if item["name"] == "undocumented_function"][0]
+        documented = [
+            item for item in public_items if item["name"] == "documented_function"
+        ][0]
+        undocumented = [
+            item for item in public_items if item["name"] == "undocumented_function"
+        ][0]
 
         assert documented["docstring"] == "This function has a docstring."
         assert undocumented["docstring"] is None
@@ -208,7 +216,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),  # is_git_repository
-            MagicMock(stdout=f"test.py\0"),  # ls-files
+            MagicMock(stdout="test.py\0"),  # ls-files
         ]
 
         codebase = Codebase(tmp_path)
@@ -225,7 +233,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"module.py\0"),
+            MagicMock(stdout="module.py\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -242,7 +250,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"test.txt\0"),
+            MagicMock(stdout="test.txt\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -257,7 +265,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"config.toml\0"),
+            MagicMock(stdout="config.toml\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -292,7 +300,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"test1.py\0test2.py\0test.txt\0"),
+            MagicMock(stdout="test1.py\0test2.py\0test.txt\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -309,7 +317,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"test.py\0"),
+            MagicMock(stdout="test.py\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -338,7 +346,7 @@ class TestCodebase:
 
         mock_run.side_effect = [
             MagicMock(stdout="true\n"),
-            MagicMock(stdout=f"image.png\0"),
+            MagicMock(stdout="image.png\0"),
         ]
 
         codebase = Codebase(tmp_path)
@@ -419,7 +427,9 @@ class TestScanner:
         mock_codebase_cls.return_value = mock_codebase
 
         # Make one check raise an error
-        scanner.registry.checks["docstrings"].run = Mock(side_effect=Exception("Test error"))
+        scanner.registry.checks["docstrings"].run = Mock(
+            side_effect=Exception("Test error")
+        )
 
         results = scanner.scan(tmp_path)
 
@@ -458,8 +468,11 @@ class TestScanner:
         assert path2 in results
 
     @patch("panoptipy.core.Codebase")
-    def test_scanner_scan_multiple_with_error(self, mock_codebase_cls, scanner, tmp_path):
+    def test_scanner_scan_multiple_with_error(
+        self, mock_codebase_cls, scanner, tmp_path
+    ):
         """Test scanning multiple repositories when one fails."""
+
         # Make the first scan succeed and second fail
         def codebase_side_effect(path):
             if "repo2" in str(path):
@@ -519,15 +532,15 @@ class TestScanSingleRepo:
 
     @patch("panoptipy.core.Scanner")
     @patch("panoptipy.core.CheckRegistry")
-    def test_scan_single_repo_success(self, mock_registry_cls, mock_scanner_cls, tmp_path):
+    def test_scan_single_repo_success(
+        self, mock_registry_cls, mock_scanner_cls, tmp_path
+    ):
         """Test _scan_single_repo with successful scan."""
         mock_registry = MagicMock()
         mock_registry_cls.return_value = mock_registry
 
         mock_scanner = MagicMock()
-        mock_scanner.scan.return_value = [
-            CheckResult("test", CheckStatus.PASS, "Pass")
-        ]
+        mock_scanner.scan.return_value = [CheckResult("test", CheckStatus.PASS, "Pass")]
         mock_scanner_cls.return_value = mock_scanner
 
         config_dict = Config.DEFAULT_CONFIG.copy()

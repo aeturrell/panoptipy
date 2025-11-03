@@ -473,7 +473,7 @@ def _scan_single_repo(
         path, config_dict = path_config_tuple
 
         # Reconstruct the Config object
-        config = Config.from_dict(config_dict)
+        config = Config(config_dict)
 
         # Create a new Scanner instance in this process
         registry = CheckRegistry(config=config)

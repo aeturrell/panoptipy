@@ -122,7 +122,8 @@ class ConsoleReporter(BaseReporter):
             # Multiple repositories
             for repo_path, repo_results in results.items():
                 self.console.print(f"\n[bold blue]Repository:[/bold blue] {repo_path}")
-                self._display_rating(rating)
+                if rating:
+                    self._display_rating(rating)
                 self._display_summary(repo_results)
                 self._display_results_table(repo_results, repo_path)
                 if self.show_details:
@@ -131,7 +132,8 @@ class ConsoleReporter(BaseReporter):
             # Single repository
             if repo_path:
                 self.console.print(f"\n[bold blue]Repository:[/bold blue] {repo_path}")
-            self._display_rating(rating)
+            if rating:
+                self._display_rating(rating)
             self._display_summary(results)
             self._display_results_table(results, repo_path)
             if self.show_details:
@@ -149,10 +151,7 @@ class ConsoleReporter(BaseReporter):
         if self.export_format == "svg":
             self.console.save_svg(self.output_path, title="Panoptipy Report")
         elif self.export_format == "html":
-            self.console.save_html(
-                self.output_path,
-                theme="dark" if self.console.color_system != "windows" else "light",
-            )
+            self.console.save_html(self.output_path)
 
     def report_with_progress(self, checks: List[str]) -> None:
         """Display a progress indicator while checks are running.

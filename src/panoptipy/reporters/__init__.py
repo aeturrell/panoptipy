@@ -14,7 +14,7 @@ ReporterFormat = Literal["console", "json", "parquet", "svg", "html"]
 def get_reporter(
     format: ReporterFormat = "console",
     output_path: Optional[Path] = None,
-    config: Config = None,
+    config: Optional[Config] = None,
     **kwargs: Any,
 ) -> Union[ConsoleReporter, JSONReporter, ParquetReporter]:
     """Get a reporter instance based on the specified format.

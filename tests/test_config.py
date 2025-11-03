@@ -1,8 +1,6 @@
 """Tests for config.py module."""
 
-import tempfile
 from pathlib import Path
-from unittest.mock import mock_open, patch
 
 import pytest
 import toml
@@ -34,13 +32,7 @@ def test_config_get_with_default():
 
 def test_config_get_nested():
     """Test getting nested configuration values."""
-    config = Config({
-        "level1": {
-            "level2": {
-                "level3": "value"
-            }
-        }
-    })
+    config = Config({"level1": {"level2": {"level3": "value"}}})
 
     assert config.get("level1.level2.level3") == "value"
     assert config.get("level1.level2") == {"level3": "value"}
@@ -120,11 +112,9 @@ def test_load_config_with_valid_file(tmp_path):
             "panoptipy": {
                 "checks": {
                     "enabled": ["ruff_linting", "docstrings"],
-                    "critical": ["ruff_linting"]
+                    "critical": ["ruff_linting"],
                 },
-                "thresholds": {
-                    "max_file_size": 1000
-                }
+                "thresholds": {"max_file_size": 1000},
             }
         }
     }
@@ -144,23 +134,14 @@ def test_load_config_with_valid_file(tmp_path):
 def test_merge_configs():
     """Test merging configuration dictionaries."""
     base = {
-        "checks": {
-            "enabled": ["*"],
-            "disabled": []
-        },
-        "thresholds": {
-            "max_file_size": 500
-        }
+        "checks": {"enabled": ["*"], "disabled": []},
+        "thresholds": {"max_file_size": 500},
     }
 
     override = {
-        "checks": {
-            "enabled": ["ruff_linting"]
-        },
-        "thresholds": {
-            "max_file_size": 1000
-        },
-        "new_key": "new_value"
+        "checks": {"enabled": ["ruff_linting"]},
+        "thresholds": {"max_file_size": 1000},
+        "new_key": "new_value",
     }
 
     Config._merge_configs(base, override)
@@ -190,19 +171,10 @@ def test_to_dict():
 def test_to_dict_with_custom_config():
     """Test converting config with custom values to dictionary."""
     custom_config = {
-        "checks": {
-            "enabled": ["custom_check"],
-            "disabled": [],
-            "critical": []
-        },
-        "reporters": {
-            "enabled": ["json"],
-            "show_details": False
-        },
-        "thresholds": {
-            "max_file_size": 2000
-        },
-        "custom_key": "custom_value"
+        "checks": {"enabled": ["custom_check"], "disabled": [], "critical": []},
+        "reporters": {"enabled": ["json"], "show_details": False},
+        "thresholds": {"max_file_size": 2000},
+        "custom_key": "custom_value",
     }
 
     config = Config(custom_config)
@@ -220,15 +192,10 @@ def test_from_dict():
         "checks": {
             "enabled": ["test_check"],
             "disabled": [],
-            "critical": ["critical_check"]
+            "critical": ["critical_check"],
         },
-        "reporters": {
-            "enabled": ["console"],
-            "show_details": True
-        },
-        "thresholds": {
-            "max_file_size": 750
-        }
+        "reporters": {"enabled": ["console"], "show_details": True},
+        "thresholds": {"max_file_size": 750},
     }
 
     # Config.from_dict has implementation issues, so we test direct initialization
@@ -247,4 +214,6 @@ def test_config_roundtrip():
     restored = Config(config_dict)
 
     assert restored.get("checks.enabled") == original.get("checks.enabled")
-    assert restored.get("thresholds.max_file_size") == original.get("thresholds.max_file_size")
+    assert restored.get("thresholds.max_file_size") == original.get(
+        "thresholds.max_file_size"
+    )

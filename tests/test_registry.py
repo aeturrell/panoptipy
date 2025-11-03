@@ -32,7 +32,7 @@ class DummyCheck(Check):
         return CheckResult(
             check_id=self.check_id,
             status=CheckStatus.PASS,
-            message="Dummy check passed"
+            message="Dummy check passed",
         )
 
 
@@ -124,9 +124,14 @@ def test_load_builtin_checks_types(registry_with_config):
     assert isinstance(registry_with_config.checks["ruff_format"], RuffFormatCheck)
     assert isinstance(registry_with_config.checks["large_files"], LargeFilesCheck)
     assert isinstance(registry_with_config.checks["private_key"], PrivateKeyCheck)
-    assert isinstance(registry_with_config.checks["notebook_output"], NotebookOutputCheck)
+    assert isinstance(
+        registry_with_config.checks["notebook_output"], NotebookOutputCheck
+    )
     assert isinstance(registry_with_config.checks["pydoclint"], PydoclintCheck)
-    assert isinstance(registry_with_config.checks["pyproject_toml_validate"], PyprojectTomlValidateCheck)
+    assert isinstance(
+        registry_with_config.checks["pyproject_toml_validate"],
+        PyprojectTomlValidateCheck,
+    )
     assert isinstance(registry_with_config.checks["has_tests"], HasTestsCheck)
     assert isinstance(registry_with_config.checks["readme"], ReadmeCheck)
     assert isinstance(registry_with_config.checks["sql_linting"], SqlLintingCheck)
@@ -163,7 +168,6 @@ def test_load_plugins(registry):
 
 def test_registry_plugin_manager_hookspecs(registry):
     """Test that plugin manager has correct hook specifications."""
-    from panoptipy.registry import PanoptiPyHooks
 
     # Check that the hook spec is registered
     assert registry.plugin_manager.project_name == "panoptipy"

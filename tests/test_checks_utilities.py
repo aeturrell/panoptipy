@@ -35,7 +35,7 @@ def test_check_result_dataclass():
         status=CheckStatus.PASS,
         message="Test message",
         repo_path=Path("/test/repo"),
-        details={"key": "value"}
+        details={"key": "value"},
     )
 
     assert result.check_id == "test_check"
@@ -48,9 +48,7 @@ def test_check_result_dataclass():
 def test_check_result_optional_fields():
     """Test CheckResult with optional fields as None."""
     result = CheckResult(
-        check_id="test_check",
-        status=CheckStatus.PASS,
-        message="Test message"
+        check_id="test_check", status=CheckStatus.PASS, message="Test message"
     )
 
     assert result.repo_path is None
@@ -112,6 +110,7 @@ def test_fail_result_with_details():
 
 def test_safe_check_run_success():
     """Test safe_check_run with successful check."""
+
     def check_fn():
         return CheckResult("test_check", CheckStatus.PASS, "Success")
 
@@ -123,6 +122,7 @@ def test_safe_check_run_success():
 
 def test_safe_check_run_with_exception():
     """Test safe_check_run when check raises exception."""
+
     def check_fn():
         raise ValueError("Something went wrong")
 
@@ -136,6 +136,7 @@ def test_safe_check_run_with_exception():
 
 def test_safe_check_run_preserves_check_id():
     """Test that safe_check_run uses correct check_id on error."""
+
     def check_fn():
         raise RuntimeError("Error")
 
@@ -160,7 +161,7 @@ file3.py:30:10: F401 Unused import"""
             "file": parts[0],
             "line": int(parts[1]),
             "column": int(parts[2]),
-            "message": parts[3].strip()
+            "message": parts[3].strip(),
         }
 
     issues = parse_tool_output(output, line_parser)
@@ -236,28 +237,28 @@ line3"""
 @patch("panoptipy.checks.subprocess.run")
 def test_get_tracked_files_success(mock_run):
     """Test get_tracked_files with successful git command."""
+    import os
+
     mock_run.return_value = MagicMock(
-        stdout="file1.py\nfile2.py\nfile3.py\n",
-        returncode=0
+        stdout="file1.py\nfile2.py\nfile3.py\n", returncode=0
     )
 
-    files = get_tracked_files("/test/repo")
+    test_root = str(Path("/test/repo"))
+    files = get_tracked_files(test_root)
 
     assert len(files) == 3
-    assert "/test/repo/file1.py" in files
-    assert "/test/repo/file2.py" in files
-    assert "/test/repo/file3.py" in files
+    assert os.path.join(test_root, "file1.py") in files
+    assert os.path.join(test_root, "file2.py") in files
+    assert os.path.join(test_root, "file3.py") in files
 
 
 @patch("panoptipy.checks.subprocess.run")
 def test_get_tracked_files_with_pattern(mock_run):
     """Test get_tracked_files with file pattern."""
-    mock_run.return_value = MagicMock(
-        stdout="test.py\nutils.py\n",
-        returncode=0
-    )
+    mock_run.return_value = MagicMock(stdout="test.py\nutils.py\n", returncode=0)
 
-    files = get_tracked_files("/test/repo", "*.py")
+    test_root = str(Path("/test/repo"))
+    get_tracked_files(test_root, "*.py")
 
     mock_run.assert_called_once()
     cmd = mock_run.call_args[0][0]
@@ -269,7 +270,8 @@ def test_get_tracked_files_subprocess_error(mock_run):
     """Test get_tracked_files when subprocess raises error."""
     mock_run.side_effect = subprocess.SubprocessError("Git error")
 
-    files = get_tracked_files("/test/repo")
+    test_root = str(Path("/test/repo"))
+    files = get_tracked_files(test_root)
 
     assert files == set()
 
@@ -279,7 +281,8 @@ def test_get_tracked_files_file_not_found(mock_run):
     """Test get_tracked_files when git is not found."""
     mock_run.side_effect = FileNotFoundError("git not found")
 
-    files = get_tracked_files("/test/repo")
+    test_root = str(Path("/test/repo"))
+    files = get_tracked_files(test_root)
 
     assert files == set()
 
@@ -289,7 +292,8 @@ def test_get_tracked_files_empty_output(mock_run):
     """Test get_tracked_files with empty output."""
     mock_run.return_value = MagicMock(stdout="", returncode=0)
 
-    files = get_tracked_files("/test/repo")
+    test_root = str(Path("/test/repo"))
+    files = get_tracked_files(test_root)
 
     assert files == set()
 
@@ -298,11 +302,11 @@ def test_get_tracked_files_empty_output(mock_run):
 def test_get_tracked_files_strips_whitespace(mock_run):
     """Test that get_tracked_files strips whitespace from filenames."""
     mock_run.return_value = MagicMock(
-        stdout="  file1.py  \n\n  file2.py  \n",
-        returncode=0
+        stdout="  file1.py  \n\n  file2.py  \n", returncode=0
     )
 
-    files = get_tracked_files("/test/repo")
+    test_root = str(Path("/test/repo"))
+    files = get_tracked_files(test_root)
 
     assert len(files) == 2
     # Verify no extra whitespace in paths
@@ -332,22 +336,29 @@ def test_docstring_check_is_public():
 
 def test_docstring_check_is_test():
     """Test DocstringCheck._is_test method."""
+    import os
+
     check = DocstringCheck()
 
-    # Test file paths
-    assert check._is_test("func", "/path/to/test_file.py") is True
-    assert check._is_test("func", "/path/to/tests/file.py") is True
-    assert check._is_test("func", "/path/to/Test_Module.py") is True
+    # Test file paths - use os.path.join for cross-platform compatibility
+    test_file_path = os.path.join("path", "to", "test_file.py")
+    tests_path = os.path.join("path", "to", "tests", "file.py")
+    test_module_path = os.path.join("path", "to", "Test_Module.py")
+    regular_path = os.path.join("path", "to", "file.py")
+
+    assert check._is_test("func", test_file_path) is True
+    assert check._is_test("func", tests_path) is True
+    assert check._is_test("func", test_module_path) is True
 
     # Test function/class names
-    assert check._is_test("test_function", "/path/to/file.py") is True
-    assert check._is_test("function_test", "/path/to/file.py") is True
-    assert check._is_test("MyTests", "/path/to/file.py") is True
-    assert check._is_test("MyTest", "/path/to/file.py") is True
+    assert check._is_test("test_function", regular_path) is True
+    assert check._is_test("function_test", regular_path) is True
+    assert check._is_test("MyTests", regular_path) is True
+    assert check._is_test("MyTest", regular_path) is True
 
     # Non-test cases
-    assert check._is_test("regular_function", "/path/to/file.py") is False
-    assert check._is_test("MyClass", "/path/to/file.py") is False
+    assert check._is_test("regular_function", regular_path) is False
+    assert check._is_test("MyClass", regular_path) is False
 
 
 def test_docstring_check_category():

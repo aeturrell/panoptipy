@@ -1,9 +1,8 @@
 """Tests for reporter modules."""
 
 import json
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -41,7 +40,10 @@ def test_concrete_reporter():
     """Test that concrete implementation of BaseReporter works."""
     reporter = ConcreteReporter()
     results_by_repo = {Path("/repo1"): [], Path("/repo2"): []}
-    ratings = {Path("/repo1"): CodebaseRating.GOLD, Path("/repo2"): CodebaseRating.SILVER}
+    ratings = {
+        Path("/repo1"): CodebaseRating.GOLD,
+        Path("/repo2"): CodebaseRating.SILVER,
+    }
 
     reporter.report(results_by_repo, ratings)
 
@@ -96,9 +98,11 @@ def test_json_reporter_single_repo(mock_print_json):
 def test_json_reporter_multiple_repos(mock_print_json):
     """Test JSON reporter with multiple repository results."""
     reporter = JSONReporter()
+    repo1_path = Path("/repo1")
+    repo2_path = Path("/repo2")
     results_by_repo = {
-        Path("/repo1"): [CheckResult("check1", CheckStatus.PASS, "Pass")],
-        Path("/repo2"): [CheckResult("check2", CheckStatus.FAIL, "Fail")],
+        repo1_path: [CheckResult("check1", CheckStatus.PASS, "Pass")],
+        repo2_path: [CheckResult("check2", CheckStatus.FAIL, "Fail")],
     }
 
     reporter.report(results_by_repo)
@@ -108,8 +112,9 @@ def test_json_reporter_multiple_repos(mock_print_json):
     data = json.loads(json_str)
 
     assert "repositories" in data
-    assert "/repo1" in data["repositories"]
-    assert "/repo2" in data["repositories"]
+    # Use str(Path) for cross-platform compatibility
+    assert str(repo1_path) in data["repositories"]
+    assert str(repo2_path) in data["repositories"]
 
 
 def test_json_reporter_write_to_file(tmp_path):
@@ -140,7 +145,7 @@ def test_json_reporter_with_details(mock_print_json):
             "check1",
             CheckStatus.FAIL,
             "Fail message",
-            details={"file": "test.py", "line": 42}
+            details={"file": "test.py", "line": 42},
         )
     ]
 
@@ -164,7 +169,7 @@ def test_json_reporter_without_details(mock_print_json):
             "check1",
             CheckStatus.FAIL,
             "Fail message",
-            details={"file": "test.py", "line": 42}
+            details={"file": "test.py", "line": 42},
         )
     ]
 

@@ -16,16 +16,14 @@ def default_config():
 @pytest.fixture
 def rating_config():
     """Create a config with rating thresholds."""
-    return Config({
-        "rating": {
-            "thresholds": {
-                "gold": 0.9,
-                "silver": 0.7,
-                "bronze": 0.5
-            },
-            "critical_checks": ["critical_check"]
+    return Config(
+        {
+            "rating": {
+                "thresholds": {"gold": 0.9, "silver": 0.7, "bronze": 0.5},
+                "critical_checks": ["critical_check"],
+            }
         }
-    })
+    )
 
 
 @pytest.fixture
@@ -305,22 +303,15 @@ def test_rating_calculator_with_default_config(default_config):
 
 def test_rating_with_custom_thresholds():
     """Test rating calculation with custom thresholds."""
-    config = Config({
-        "rating": {
-            "thresholds": {
-                "gold": 0.95,
-                "silver": 0.85,
-                "bronze": 0.75
-            }
-        }
-    })
+    config = Config(
+        {"rating": {"thresholds": {"gold": 0.95, "silver": 0.85, "bronze": 0.75}}}
+    )
     calc = RatingCalculator(config)
 
     # 90% pass rate
-    results = [
-        CheckResult(f"check{i}", CheckStatus.PASS, "Pass")
-        for i in range(9)
-    ] + [CheckResult("check10", CheckStatus.FAIL, "Fail")]
+    results = [CheckResult(f"check{i}", CheckStatus.PASS, "Pass") for i in range(9)] + [
+        CheckResult("check10", CheckStatus.FAIL, "Fail")
+    ]
 
     rating = calc.calculate_rating(results)
     assert rating == CodebaseRating.SILVER  # Below gold threshold of 95%

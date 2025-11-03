@@ -1,5 +1,6 @@
 """Tests for reporters/__init__.py module."""
 
+import sys
 from typing import cast
 
 import pytest
@@ -9,6 +10,9 @@ from panoptipy.reporters import ReporterFormat, get_reporter
 from panoptipy.reporters.console import ConsoleReporter
 from panoptipy.reporters.json import JSONReporter
 from panoptipy.reporters.parquet import ParquetReporter
+
+# Check if typeguard is active
+TYPEGUARD_ACTIVE = "typeguard" in sys.modules
 
 
 class TestGetReporter:
@@ -75,10 +79,13 @@ class TestGetReporter:
         with pytest.raises(ValueError, match="output_path is required"):
             get_reporter(format="html")
 
+    @pytest.mark.skipif(
+        TYPEGUARD_ACTIVE, reason="Typeguard prevents invalid format at runtime"
+    )
     def test_get_reporter_with_invalid_format(self):
         """Test getting reporter with invalid format."""
         with pytest.raises(ValueError, match="Unknown reporter format"):
-            # Use cast to bypass typeguard checking for invalid format test
+            # Use cast to bypass type checker (but not runtime typeguard)
             get_reporter(format=cast(ReporterFormat, "invalid"))
 
     def test_get_reporter_with_config(self):

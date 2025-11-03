@@ -68,3 +68,11 @@ disallow_untyped_calls = false
 [tool.pydoclint]
 style = 'google'
 exclude = ["noxfile.py", "tests/", "docs/"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

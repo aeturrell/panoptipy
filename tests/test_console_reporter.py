@@ -89,8 +89,8 @@ class TestConsoleReporter:
     def test_report_multiple_repos(self, console_reporter, sample_results):
         """Test reporting for multiple repositories."""
         results_by_repo = {
-            Path("/repo1"): sample_results[:2],
-            Path("/repo2"): sample_results[2:],
+            Path("/repo1"): sample_results[:2],  # PASS, FAIL
+            Path("/repo2"): [sample_results[0], sample_results[2]],  # PASS, WARNING
         }
 
         # Should not raise an error - note that rating is ignored for multiple repos

@@ -3,7 +3,7 @@
 import ast
 import subprocess
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -420,22 +420,36 @@ class TestScanner:
         mock_codebase.scan_files.assert_called_once()
 
     @patch("panoptipy.core.Codebase")
-    def test_scanner_scan_with_check_error(self, mock_codebase_cls, scanner, tmp_path):
+    def test_scanner_scan_with_check_error(self, mock_codebase_cls, registry, tmp_path):
         """Test scanning when a check raises an error."""
         mock_codebase = MagicMock()
         mock_codebase.get_all_files.return_value = []
         mock_codebase_cls.return_value = mock_codebase
 
-        # Make one check raise an error
-        scanner.registry.checks["docstrings"].run = Mock(
-            side_effect=Exception("Test error")
-        )
+        # Create a fresh scanner with a minimal config for this test
+        config = Config({"checks": {"enabled": ["error_check"], "disabled": []}})
+        fresh_scanner = Scanner(registry, config)
 
-        results = scanner.scan(tmp_path)
+        # Create a fresh mock check that raises an error
+        error_check = MagicMock()
+        error_check.check_id = "error_check"
+        error_check.run.side_effect = Exception("Test error")
 
-        # Should have error results for failed checks
-        error_results = [r for r in results if r.status == CheckStatus.ERROR]
-        assert len(error_results) > 0
+        # Add the error check to the registry for this test
+        fresh_scanner.registry.checks["error_check"] = error_check
+
+        try:
+            results = fresh_scanner.scan(tmp_path)
+
+            # Should have error results for failed checks
+            error_results = [r for r in results if r.status == CheckStatus.ERROR]
+            assert len(error_results) > 0, (
+                f"Expected error results, but got {len(results)} results"
+            )
+            assert any("Test error" in r.message for r in error_results)
+        finally:
+            # Clean up the error check from the registry to avoid affecting other tests
+            fresh_scanner.registry.checks.pop("error_check", None)
 
     def test_scanner_rate(self, scanner):
         """Test rating calculation."""

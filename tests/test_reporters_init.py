@@ -1,9 +1,11 @@
 """Tests for reporters/__init__.py module."""
 
+from typing import cast
+
 import pytest
 
 from panoptipy.config import Config
-from panoptipy.reporters import get_reporter
+from panoptipy.reporters import ReporterFormat, get_reporter
 from panoptipy.reporters.console import ConsoleReporter
 from panoptipy.reporters.json import JSONReporter
 from panoptipy.reporters.parquet import ParquetReporter
@@ -76,7 +78,8 @@ class TestGetReporter:
     def test_get_reporter_with_invalid_format(self):
         """Test getting reporter with invalid format."""
         with pytest.raises(ValueError, match="Unknown reporter format"):
-            get_reporter(format="invalid")
+            # Use cast to bypass typeguard checking for invalid format test
+            get_reporter(format=cast(ReporterFormat, "invalid"))
 
     def test_get_reporter_with_config(self):
         """Test getting reporter with config."""

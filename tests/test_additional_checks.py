@@ -275,9 +275,11 @@ class TestNotebookOutputCheck:
         assert "notebook" in check.description.lower()
         assert check.category == "notebook_cleanliness"
 
-    def test_notebook_output_check_no_notebooks(self, mock_codebase):
+    @patch("panoptipy.checks.get_tracked_files")
+    def test_notebook_output_check_no_notebooks(self, mock_get_tracked, mock_codebase):
         """Test NotebookOutputCheck with no notebooks."""
-        mock_codebase.find_files_by_extension.return_value = []
+        mock_codebase.root_path = Path("/test/repo")
+        mock_get_tracked.return_value = []
 
         check = NotebookOutputCheck()
         result = check.run(mock_codebase)

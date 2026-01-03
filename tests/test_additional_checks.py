@@ -7,6 +7,7 @@ import pytest
 
 from panoptipy.checks import (
     CheckStatus,
+    CognitiveComplexityCheck,
     DocstringCheck,
     HasTestsCheck,
     LargeFilesCheck,
@@ -489,3 +490,121 @@ class TestFoo:
 
         assert result.status == CheckStatus.PASS
         assert result.details["test_count"] >= 1
+
+
+class TestCognitiveComplexityCheck:
+    """Tests for CognitiveComplexityCheck class."""
+
+    def test_cognitive_complexity_check_init(self):
+        """Test CognitiveComplexityCheck initialization."""
+        check = CognitiveComplexityCheck()
+
+        assert check.check_id == "cognitive_complexity"
+        assert "complexity" in check.description.lower()
+        assert check.category == "complexity"
+
+    def test_cognitive_complexity_check_default_threshold(self):
+        """Test CognitiveComplexityCheck with default threshold."""
+        check = CognitiveComplexityCheck()
+
+        assert check.max_complexity == 15
+
+    def test_cognitive_complexity_check_custom_threshold(self):
+        """Test CognitiveComplexityCheck with custom threshold from config."""
+        config_dict = Config.DEFAULT_CONFIG.copy()
+        config_dict["thresholds"] = {"max_cognitive_complexity": 10}
+        config = Config(config_dict)
+        check = CognitiveComplexityCheck(config=config)
+
+        assert check.max_complexity == 10
+
+    @patch("panoptipy.checks.get_tracked_files")
+    def test_cognitive_complexity_check_no_python_files(
+        self, mock_get_tracked, mock_codebase
+    ):
+        """Test CognitiveComplexityCheck with no Python files."""
+        mock_codebase.root_path = Path("/test/repo")
+        mock_get_tracked.return_value = set()
+
+        check = CognitiveComplexityCheck()
+        result = check.run(mock_codebase)
+
+        assert result.status == CheckStatus.SKIP
+
+    @patch("panoptipy.checks.get_tracked_files")
+    def test_cognitive_complexity_check_simple_functions(
+        self, mock_get_tracked, tmp_path, mock_codebase
+    ):
+        """Test CognitiveComplexityCheck with simple functions."""
+        mock_codebase.root_path = tmp_path
+
+        # Create a simple Python file with low complexity
+        simple_file = tmp_path / "simple.py"
+        simple_file.write_text("""
+def simple_func():
+    return True
+
+def another_simple_func(x):
+    if x > 0:
+        return x
+    return 0
+""")
+
+        mock_get_tracked.return_value = {str(simple_file)}
+
+        check = CognitiveComplexityCheck()
+        result = check.run(mock_codebase)
+
+        assert result.status == CheckStatus.PASS
+        assert "threshold" in result.details
+
+    @patch("panoptipy.checks.get_tracked_files")
+    def test_cognitive_complexity_check_complex_functions(
+        self, mock_get_tracked, tmp_path, mock_codebase
+    ):
+        """Test CognitiveComplexityCheck with complex functions."""
+        mock_codebase.root_path = tmp_path
+
+        # Create a Python file with high cognitive complexity
+        complex_file = tmp_path / "complex.py"
+        complex_file.write_text("""
+def complex_func(x, y, z):
+    if x > 0:
+        if y > 0:
+            if z > 0:
+                for i in range(x):
+                    if i % 2 == 0:
+                        for j in range(y):
+                            if j % 2 == 0:
+                                for k in range(z):
+                                    if k % 2 == 0:
+                                        if i + j + k > 10:
+                                            if i * j * k > 100:
+                                                return True
+                                            else:
+                                                continue
+                                        else:
+                                            break
+                                    else:
+                                        pass
+                            else:
+                                continue
+                    else:
+                        pass
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+    return None
+""")
+
+        mock_get_tracked.return_value = {str(complex_file)}
+
+        check = CognitiveComplexityCheck()
+        result = check.run(mock_codebase)
+
+        assert result.status == CheckStatus.FAIL
+        assert "complex_functions" in result.details
+        assert result.details["count"] > 0

@@ -149,9 +149,9 @@ class ConsoleReporter(BaseReporter):
             return
 
         if self.export_format == "svg":
-            self.console.save_svg(self.output_path, title="Panoptipy Report")
+            self.console.save_svg(str(self.output_path), title="Panoptipy Report")
         elif self.export_format == "html":
-            self.console.save_html(self.output_path)
+            self.console.save_html(str(self.output_path))
 
     def report_with_progress(self, checks: List[str]) -> None:
         """Display a progress indicator while checks are running.
@@ -225,7 +225,7 @@ class ConsoleReporter(BaseReporter):
         )
 
     def _display_results_table(
-        self, results: List["CheckResult"], repo_path: Path
+        self, results: List["CheckResult"], repo_path: Optional[Path]
     ) -> None:
         """Display a table of check results.
 
@@ -301,7 +301,7 @@ class ConsoleReporter(BaseReporter):
 
         self.console.print(table)
 
-    def _display_details(self, results: List["CheckResult"], repo_path: Path) -> None:
+    def _display_details(self, results: List["CheckResult"], repo_path: Optional[Path]) -> None:
         """Display detailed information for failed and warning checks.
 
         Args:
@@ -324,13 +324,15 @@ class ConsoleReporter(BaseReporter):
             status = result.status.value
             color = self.STATUS_STYLES.get(status, {}).get("color", "white")
 
-            self.console.print(
-                Panel(
-                    self._format_details(result.details),
-                    title=f"[{color}]{result.check_id}[/{color}]",
-                    border_style=color,
+            # result.details is guaranteed to be non-None by the filter above
+            if result.details is not None:
+                self.console.print(
+                    Panel(
+                        self._format_details(result.details),
+                        title=f"[{color}]{result.check_id}[/{color}]",
+                        border_style=color,
+                    )
                 )
-            )
 
     def _format_details(self, details: Dict[str, Any]) -> str:
         """Format details dictionary for display.

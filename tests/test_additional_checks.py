@@ -215,6 +215,7 @@ class TestLargeFilesCheck:
             result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert "large_files" in result.details
 
 
@@ -262,6 +263,7 @@ class TestPrivateKeyCheck:
             result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert "files_with_private_keys" in result.details
 
 
@@ -324,6 +326,7 @@ class TestNotebookOutputCheck:
             result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert "notebooks_with_output" in result.details
 
 
@@ -456,6 +459,7 @@ def test_another_thing():
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.PASS
+        assert result.details is not None
         assert result.details["test_count"] == 2
 
     def test_has_tests_check_without_test_files(self, tmp_path, mock_codebase):
@@ -489,6 +493,7 @@ class TestFoo:
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.PASS
+        assert result.details is not None
         assert result.details["test_count"] >= 1
 
 
@@ -556,6 +561,7 @@ def another_simple_func(x):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.PASS
+        assert result.details is not None
         assert "threshold" in result.details
 
     @patch("panoptipy.checks.get_tracked_files")
@@ -606,6 +612,7 @@ def complex_func(x, y, z):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert "complex_functions" in result.details
         assert result.details["count"] > 0
 
@@ -625,6 +632,7 @@ def complex_func(x, y, z):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.PASS
+        assert result.details is not None
         assert "threshold" in result.details
         assert "files_analyzed" in result.details
         assert result.details["files_analyzed"] == 1
@@ -653,6 +661,7 @@ def complex_func(x, y, z):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.PASS
+        assert result.details is not None
         assert result.details["files_analyzed"] == 3
 
     @patch("panoptipy.checks.get_tracked_files")
@@ -689,6 +698,7 @@ def complex_func(x):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert result.details["count"] >= 1
         # Verify files_analyzed is populated
         assert result.details["files_analyzed"] == 1
@@ -746,6 +756,7 @@ def very_complex(a, b, c):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert result.details["count"] >= 2
         # Verify sorted by complexity (descending)
         complexities = [f["complexity"] for f in result.details["complex_functions"]]
@@ -833,6 +844,7 @@ def moderate_func(x):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert result.details["threshold"] == 1
 
     @patch("panoptipy.checks.get_tracked_files")
@@ -865,6 +877,7 @@ def complex_func(x):
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         assert len(result.details["complex_functions"]) > 0
 
         func_detail = result.details["complex_functions"][0]
@@ -910,6 +923,7 @@ class MyClass:
         result = check.run(mock_codebase)
 
         assert result.status == CheckStatus.FAIL
+        assert result.details is not None
         # Should find the complex method (complexipy uses ClassName::method_name format)
         func_names = [f["function"] for f in result.details["complex_functions"]]
         assert any("complex_method" in name for name in func_names)

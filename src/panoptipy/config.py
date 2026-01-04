@@ -168,7 +168,7 @@ class Config:
         Returns:
             Config object
         """
-        config = cls()
+        config = cls(config_dict)
 
         # If your Config class stores the config in _config attribute:
         if hasattr(config, "_config"):

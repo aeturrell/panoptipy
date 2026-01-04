@@ -8,7 +8,7 @@ import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import toml
 from validate_pyproject import api, errors
@@ -58,20 +58,23 @@ class Check:
         return "general"
 
 
-def get_tracked_files(root_dir: str, pattern: Optional[str] = None) -> Set[str]:
+def get_tracked_files(
+    root_dir: Union[str, Path], pattern: Optional[str] = None
+) -> Set[str]:
     try:
         cmd = ["git", "ls-files"]
         if pattern:
             cmd.append(pattern)
+        root_dir_str = str(root_dir)
         result = subprocess.run(
             cmd,
-            cwd=root_dir,
+            cwd=root_dir_str,
             capture_output=True,
             text=True,
             check=True,
         )
         return {
-            os.path.join(root_dir, line.strip())
+            os.path.join(root_dir_str, line.strip())
             for line in result.stdout.splitlines()
             if line.strip()
         }
@@ -167,6 +170,8 @@ class DocstringCheck(Check):
             relative_path = os.path.relpath(module.path, root_dir)
             for item in module.get_public_items():
                 item_name = item.get("name") if isinstance(item, dict) else item.name
+                if not isinstance(item_name, str):
+                    continue
                 if not self._is_public(item_name) or self._is_test(
                     item_name, module_path
                 ):
@@ -773,7 +778,7 @@ class PyprojectTomlValidateCheck(Check):
             return fail_result(
                 check_id=self.check_id,
                 message=f"pyproject.toml validation failed: {ex.message}",
-                details={"error": str(ex), "context": ex.context},
+                details={"error": str(ex)},
             )
 
     def run(self, codebase: "Codebase") -> CheckResult:

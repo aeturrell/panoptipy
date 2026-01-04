@@ -131,6 +131,7 @@ def test_safe_check_run_with_exception():
     assert result.status == CheckStatus.ERROR
     assert "Error executing check" in result.message
     assert "Something went wrong" in result.message
+    assert result.details is not None
     assert result.details["error"] == "Something went wrong"
 
 

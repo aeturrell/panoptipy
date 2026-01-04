@@ -1,7 +1,7 @@
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, cast
 
 import click
 
@@ -9,7 +9,7 @@ from .checks import CheckStatus
 from .config import Config
 from .core import Scanner
 from .registry import CheckRegistry
-from .reporters import get_reporter
+from .reporters import ReporterFormat, get_reporter
 
 reporters_accepting_output_paths: List[str] = ["json", "parquet", "svg", "html"]
 
@@ -58,7 +58,7 @@ def run_scan(
     combined_results = scan_sources(scanner)
 
     reporter = get_reporter(
-        format=format,
+        format=cast(ReporterFormat, format),
         output_path=output if format in reporters_accepting_output_paths else None,
         config=config_obj,
     )

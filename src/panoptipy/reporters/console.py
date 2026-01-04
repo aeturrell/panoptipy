@@ -301,7 +301,9 @@ class ConsoleReporter(BaseReporter):
 
         self.console.print(table)
 
-    def _display_details(self, results: List["CheckResult"], repo_path: Optional[Path]) -> None:
+    def _display_details(
+        self, results: List["CheckResult"], repo_path: Optional[Path]
+    ) -> None:
         """Display detailed information for failed and warning checks.
 
         Args:

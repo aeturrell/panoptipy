@@ -6,6 +6,7 @@ from panoptipy.checks import (
     Check,
     CheckResult,
     CheckStatus,
+    CognitiveComplexityCheck,
     DocstringCheck,
     HasTestsCheck,
     LargeFilesCheck,
@@ -109,6 +110,7 @@ def test_load_builtin_checks(registry_with_config):
         "has_tests",
         "readme",
         "sql_linting",
+        "cognitive_complexity",
     ]
 
     for check_id in expected_checks:
@@ -135,6 +137,9 @@ def test_load_builtin_checks_types(registry_with_config):
     assert isinstance(registry_with_config.checks["has_tests"], HasTestsCheck)
     assert isinstance(registry_with_config.checks["readme"], ReadmeCheck)
     assert isinstance(registry_with_config.checks["sql_linting"], SqlLintingCheck)
+    assert isinstance(
+        registry_with_config.checks["cognitive_complexity"], CognitiveComplexityCheck
+    )
 
 
 def test_register_overwrites_check(registry):

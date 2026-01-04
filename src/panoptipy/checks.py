@@ -1289,3 +1289,121 @@ class ReadmeCheck(Check):
 
     def run(self, codebase: "Codebase") -> CheckResult:
         return safe_check_run(lambda: self._run_logic(codebase), self.check_id)
+
+
+class CognitiveComplexityCheck(Check):
+    """A check that measures cognitive complexity of Python functions using complexipy.
+
+    Cognitive complexity is a measure of how difficult code is to understand,
+    as opposed to cyclomatic complexity which measures how difficult code is to test.
+    High cognitive complexity indicates code that may be hard to read and maintain.
+
+    This check analyzes all Python files in the codebase and reports functions
+    that exceed a configurable complexity threshold.
+
+    Attributes:
+        check_id (str): Identifier for this check, set to "cognitive_complexity"
+        description (str): Description of what this check does
+        max_complexity (int): Maximum allowed cognitive complexity per function
+    """
+
+    def __init__(self, config: Optional[Config] = None):
+        super().__init__(
+            check_id="cognitive_complexity",
+            description="Checks cognitive complexity of Python functions using complexipy",
+        )
+        self.config = config
+        # Default threshold of 15 is commonly used as a reasonable limit
+        self.max_complexity = (
+            config.get("thresholds.max_cognitive_complexity", 15) if config else 15
+        )
+
+    @property
+    def category(self) -> str:
+        return "complexity"
+
+    def _analyze_file(self, file_path: str, root_dir: str) -> List[Dict[str, Any]]:
+        """Analyze a single Python file for cognitive complexity.
+
+        Args:
+            file_path: Absolute path to the Python file
+            root_dir: Root directory of the codebase
+
+        Returns:
+            List of dictionaries with function complexity information
+        """
+        try:
+            from complexipy import file_complexity
+
+            result = file_complexity(file_path)
+            complex_functions = []
+
+            for func in result.functions:
+                if func.complexity > self.max_complexity:
+                    rel_path = os.path.relpath(file_path, root_dir)
+                    complex_functions.append(
+                        {
+                            "file": rel_path,
+                            "function": func.name,
+                            "complexity": func.complexity,
+                            "line_start": func.line_start,
+                            "threshold": self.max_complexity,
+                        }
+                    )
+
+            return complex_functions
+        except Exception as e:
+            logging.warning(f"Error analyzing file {file_path}: {e}")
+            return []
+
+    def _run_logic(self, codebase: "Codebase") -> CheckResult:
+        root_dir = str(codebase.root_path)
+
+        # Get all Python files tracked by git
+        python_files = get_tracked_files(root_dir, "*.py")
+
+        if not python_files:
+            return CheckResult(
+                check_id=self.check_id,
+                status=CheckStatus.SKIP,
+                message="No Python files found in version-controlled files",
+            )
+
+        # Analyze each file
+        all_complex_functions = []
+        files_analyzed = 0
+
+        for file_path in python_files:
+            if not os.path.exists(file_path):
+                continue
+
+            files_analyzed += 1
+            complex_functions = self._analyze_file(file_path, root_dir)
+            all_complex_functions.extend(complex_functions)
+
+        if all_complex_functions:
+            # Sort by complexity (highest first)
+            all_complex_functions.sort(key=lambda x: x["complexity"], reverse=True)
+
+            return fail_result(
+                check_id=self.check_id,
+                message=f"Found {len(all_complex_functions)} functions exceeding cognitive complexity threshold ({self.max_complexity})",
+                details={
+                    "complex_functions": all_complex_functions,
+                    "count": len(all_complex_functions),
+                    "threshold": self.max_complexity,
+                    "files_analyzed": files_analyzed,
+                },
+            )
+
+        return success_result(
+            check_id=self.check_id,
+            message=f"All functions are within cognitive complexity threshold ({self.max_complexity})",
+            details={
+                "threshold": self.max_complexity,
+                "files_analyzed": files_analyzed,
+            },
+        )
+
+    def run(self, codebase: "Codebase") -> CheckResult:
+        return safe_check_run(lambda: self._run_logic(codebase), self.check_id)

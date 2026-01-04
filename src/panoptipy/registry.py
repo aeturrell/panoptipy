@@ -4,6 +4,7 @@ import pluggy
 
 from .checks import (
     Check,
+    CognitiveComplexityCheck,
     DocstringCheck,
     HasTestsCheck,
     LargeFilesCheck,
@@ -64,4 +65,5 @@ class CheckRegistry:
         self.register(HasTestsCheck())
         self.register(ReadmeCheck(config=self.config))
         self.register(SqlLintingCheck())
+        self.register(CognitiveComplexityCheck(config=self.config))
         # Add extra checks here

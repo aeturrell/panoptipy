@@ -49,6 +49,7 @@ dev = [
     "python-dotenv>=1.1.0",
     "typeguard>=4.4.2",
     "nbformat>=5.10.4",
+    "ty>=0.0.8",
 ]
 
 [project.scripts]

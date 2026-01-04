@@ -60,8 +60,9 @@ def get_check_id_and_description_pairs() -> list[dict[str, str]]:
         A list of dictionaries, each containing a 'check_id' and 'description'.
     """
     try:
+        package = __package__ or "panoptipy"
         with (
-            importlib.resources.files(__package__)
+            importlib.resources.files(package)
             .joinpath("checks.py")
             .open("r", encoding="utf-8") as f
         ):

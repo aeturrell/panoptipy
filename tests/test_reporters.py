@@ -15,9 +15,10 @@ from panoptipy.reporters.json import JSONReporter, create_reporter
 class ConcreteReporter(BaseReporter):
     """Concrete implementation of BaseReporter for testing."""
 
-    def report(self, results_by_repo, ratings):
-        self.results_by_repo = results_by_repo
-        self.ratings = ratings
+    def report(self, results, rating=None, repo_path=None):
+        self.results = results
+        self.rating = rating
+        self.repo_path = repo_path
 
     def report_single(self, results, rating, repo_path):
         self.results = results
@@ -30,7 +31,7 @@ def test_base_reporter_not_implemented():
     reporter = BaseReporter()
 
     with pytest.raises(NotImplementedError):
-        reporter.report({}, {})
+        reporter.report([])
 
     with pytest.raises(NotImplementedError):
         reporter.report_single([], None, Path("/tmp"))
@@ -39,16 +40,15 @@ def test_base_reporter_not_implemented():
 def test_concrete_reporter():
     """Test that concrete implementation of BaseReporter works."""
     reporter = ConcreteReporter()
-    results_by_repo = {Path("/repo1"): [], Path("/repo2"): []}
-    ratings = {
-        Path("/repo1"): CodebaseRating.GOLD,
-        Path("/repo2"): CodebaseRating.SILVER,
-    }
+    results = [CheckResult("check1", CheckStatus.PASS, "Pass")]
+    rating = CodebaseRating.GOLD
+    repo_path = Path("/repo1")
 
-    reporter.report(results_by_repo, ratings)
+    reporter.report(results, rating, repo_path)
 
-    assert reporter.results_by_repo == results_by_repo
-    assert reporter.ratings == ratings
+    assert reporter.results == results
+    assert reporter.rating == rating
+    assert reporter.repo_path == repo_path
 
 
 def test_json_reporter_init():

@@ -62,10 +62,11 @@ class ParquetReporter(JSONReporter):
         rating: Optional[str],
     ) -> List[Dict]:
         """Convert check results to tidy record format."""
+        repo_stem = Path(repository).stem if repository else None
         return [
             {
                 "timestamp": timestamp,
-                "repository": Path(repository).stem,
+                "repository": repo_stem,
                 "check_id": result.check_id,
                 "status": result.status.name,
                 "message": result.message,

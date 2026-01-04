@@ -1,17 +1,19 @@
 """Nox sessions."""
 
+import sys
 from pathlib import Path
 from textwrap import dedent
 
 import nox
 
 package = "panoptipy"
-python_versions = ["3.10", "3.11", "3.12"]
+python_versions = ["3.10", "3.11", "3.12", "3.13"]
 nox.needs_version = ">= 2021.6.6"
 nox.options.default_venv_backend = "uv"
 nox.options.sessions = (
     "pre-commit",
     "tests",
+    "ty",
     "typeguard",
     "xdoctest",
 )
@@ -97,7 +99,7 @@ def tests(session: nox.Session) -> None:
             session.notify("coverage", posargs=[])
 
 
-@nox.session(python=python_versions[0])
+@nox.session(python=python_versions[1])
 def coverage(session: nox.Session) -> None:
     """Produce the coverage report."""
     args = session.posargs or ["report"]
@@ -123,12 +125,30 @@ def precommit(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--extra=dev",
+        "--group=dev",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
     session.run("pre-commit", *args)
     if args and args[0] == "install":
         activate_virtualenv_in_precommit_hooks(session)
+
+
+@nox.session(python=python_versions, venv_backend="uv")
+def ty(session: nox.Session) -> None:
+    """Type-check using ty."""
+    args = session.posargs or ["src"]
+
+    # Install project and dependencies using uv
+    session.run_install(
+        "uv",
+        "sync",
+        "--group=dev",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
+    session.run_install("uv", "pip", "install", "-e", ".")
+    session.run("ty", "check", ".", *args)
+    if not session.posargs:
+        session.run("ty", "check", ".", f"--python={sys.executable}", "noxfile.py")
 
 
 @nox.session(venv_backend="uv", python=python_versions)
@@ -138,7 +158,7 @@ def typeguard(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--extra=dev",
+        "--group=dev",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
     session.run_install("uv", "pip", "install", "-e", ".")
@@ -154,7 +174,7 @@ def xdoctest(session: nox.Session) -> None:
     session.run_install(
         "uv",
         "sync",
-        "--extra=dev",
+        "--group=dev",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
     session.run_install("uv", "pip", "install", "-e", ".")
